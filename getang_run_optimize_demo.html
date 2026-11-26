@@ -836,7 +836,8 @@
       return {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 650 },
+        animation: false,
+        parsing: false,
         plugins: {
           legend: { labels: { boxWidth: 10, font: { size: 11 } } },
         },
@@ -892,11 +893,10 @@
         },
         options: {
           ...common,
-          animation: { duration: 450 },
           scales: {
             x: {
               grid: { color: "rgba(19,32,40,0.04)" },
-              ticks: { font: { size: 12 }, maxRotation: 0, autoSkip: false, callback: dateTick },
+              ticks: { font: { size: 12 }, maxRotation: 0, autoSkip: false, callback: dateTick, maxTicksLimit: 7 },
             },
             y: { ...common.scales.y, suggestedMin: 100, suggestedMax: 520, title: { display: true, text: "COD", font: { size: 10 } } },
             y1: {
@@ -965,11 +965,10 @@
         },
         options: {
           ...common,
-          animation: { duration: 450 },
           scales: {
             x: {
               grid: { color: "rgba(19,32,40,0.04)" },
-              ticks: { font: { size: 12 }, maxRotation: 0, autoSkip: false, callback: dateTick },
+              ticks: { font: { size: 12 }, maxRotation: 0, autoSkip: false, callback: dateTick, maxTicksLimit: 7 },
             },
             y: { ...common.scales.y, suggestedMin: 0, suggestedMax: 55, title: { display: true, text: "COD / TN", font: { size: 10 } } },
             y1: {
@@ -987,7 +986,7 @@
     function revealInSeries(dsIndex, values) {
       if (!charts.inn) return;
       charts.inn.data.datasets[dsIndex].data = values.slice();
-      charts.inn.update();
+      charts.inn.update("none");
     }
 
     function revealOutSeries() {
@@ -995,7 +994,7 @@
       charts.out.data.datasets[0].data = OUT_COD.slice();
       charts.out.data.datasets[1].data = OUT_TN.slice();
       charts.out.data.datasets[2].data = OUT_TP.slice();
-      charts.out.update();
+      charts.out.update("none");
       document.getElementById("outChartCard").classList.add("is-ready");
     }
 
