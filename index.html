@@ -2,11 +2,94 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=./getang_ai_demo.html" />
-  <title>葛塘厂演示</title>
-  <script>location.replace("./getang_ai_demo.html");</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>葛塘厂演示入口</title>
+  <style>
+    :root {
+      --ink: #102028;
+      --muted: #5a6b75;
+      --teal: #0b6b6b;
+      --line: rgba(16, 32, 40, 0.12);
+      --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --display: "Songti SC", "STSong", "SimSun", serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--sans);
+      color: var(--ink);
+      background:
+        radial-gradient(900px 480px at 10% -10%, rgba(11,107,107,.16), transparent 55%),
+        linear-gradient(180deg, #d7e4ea, #f3f7f9 55%);
+      display: grid;
+      place-items: center;
+      padding: 32px 20px;
+    }
+    .box { width: min(720px, 100%); }
+    .kicker {
+      margin: 0 0 8px;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--teal);
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+    }
+    h1 {
+      margin: 0;
+      font-family: var(--display);
+      font-size: clamp(26px, 5vw, 36px);
+      line-height: 1.25;
+    }
+    .sub { margin: 10px 0 28px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .cards { display: grid; gap: 14px; }
+    a.card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 16px 40px rgba(16,32,40,.07);
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    a.card:hover { transform: translateY(-2px); border-color: rgba(11,107,107,.35); }
+    a.card h2 { margin: 0 0 6px; font-size: 18px; }
+    a.card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    a.card .tag {
+      display: inline-block;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--teal);
+      letter-spacing: 0.04em;
+    }
+    a.card.is-main { border-color: rgba(11,107,107,.28); background: rgba(11,107,107,.06); }
+  </style>
 </head>
 <body>
-  <p><a href="./getang_ai_demo.html">进入演示页</a></p>
+  <div class="box">
+    <p class="kicker">GETANG DEMO HUB</p>
+    <h1>葛塘演示入口</h1>
+    <p class="sub">多套示意互不覆盖。答辩/AI 项目汇报请优先用「运行数据及其工艺的优化案例」。</p>
+    <div class="cards">
+      <a class="card is-main" href="./getang_run_optimize_demo.html">
+        <span class="tag">推荐 · 手绘草图对照</span>
+        <h2>运行数据及其工艺的优化案例</h2>
+        <p>固定进水下对比传统 50,000 m³ 与 AI 优化约 30,000 m³；流程现状 → 模型仿真 → 发现问题 → 调试对比。</p>
+      </a>
+      <a class="card" href="./getang_process_innov_demo.html">
+        <span class="tag">叙事页</span>
+        <h2>工艺数字孪生 · 技改预演</h2>
+        <p>池容与流程收敛的讲解叙事页。</p>
+      </a>
+      <a class="card" href="./getang_ai_demo.html">
+        <span class="tag">保留 · 旧版</span>
+        <h2>加药 / 运行调控 AI 演示</h2>
+        <p>基线异常 → 诊断 → 调控 → 再仿真。原演示完整保留。</p>
+      </a>
+    </div>
+  </div>
 </body>
 </html>

@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>运行数据及其工艺的优化案例</title>
+  <script src="./chart.umd.min.js"></script>
+  <style>
+    :root {
+      --ink: #0e1c24;
+      --muted: #5d7380;
+      --teal: #0d7c78;
+      --teal-deep: #065a57;
+      --mint: #1f9d72;
+      --mono: Menlo, Consolas, "SF Mono", ui-monospace, monospace;
+      --display: "Songti SC", "STSong", "SimSun", serif;
+      --sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--sans);
+      color: var(--ink);
+      background:
+        radial-gradient(1000px 560px at 8% -10%, rgba(13,124,120,.26), transparent 55%),
+        radial-gradient(900px 520px at 92% 0%, rgba(31,157,114,.14), transparent 50%),
+        linear-gradient(165deg, #c9dde3 0%, #e7eef1 42%, #f4f8f9 100%);
+    }
+    .orb {
+      position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+      filter: blur(28px); opacity: .65;
+    }
+    .orb.a { width: 260px; height: 260px; left: -50px; top: 120px; background: rgba(13,124,120,.22); }
+    .orb.b { width: 200px; height: 200px; right: -30px; top: 42%; background: rgba(31,157,114,.16); }
+
+    .wrap {
+      position: relative; z-index: 1;
+      width: min(1680px, calc(100% - 40px));
+      margin: 0 auto; padding: 20px 0 40px;
+    }
+    @media (min-width: 1600px) {
+      .wrap { width: min(1840px, calc(100% - 48px)); }
+    }
+    @media (min-width: 1900px) {
+      .wrap { width: calc(100% - 56px); max-width: 2000px; }
+    }
+    .top { margin-bottom: 14px; }
+    .brand-kicker {
+      margin: 0 0 8px; font-family: var(--mono); font-size: 11px;
+      letter-spacing: .18em; text-transform: uppercase; color: var(--teal);
+    }
+    .top h1 {
+      margin: 0; font-family: var(--display); font-weight: 900;
+      font-size: clamp(26px, 4vw, 38px); line-height: 1.15;
+      background: linear-gradient(120deg, var(--ink) 15%, var(--teal-deep) 75%, var(--mint));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+
+    .rail { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+    .rail button {
+      appearance: none; border: 1px solid rgba(14,28,36,.1); background: rgba(255,255,255,.58);
+      border-radius: 16px; padding: 12px 10px; text-align: left; cursor: pointer;
+      transition: transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+    .rail button:hover:not(:disabled) { transform: translateY(-2px); border-color: rgba(13,124,120,.35); }
+    .rail button:disabled { opacity: .4; cursor: not-allowed; }
+    .rail button.is-on {
+      background: linear-gradient(145deg, rgba(13,124,120,.16), rgba(255,255,255,.72));
+      border-color: rgba(13,124,120,.4);
+      box-shadow: 0 12px 28px rgba(13,124,120,.12);
+    }
+    .rail .n { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; color: var(--teal); margin-bottom: 4px; }
+    .rail .l { display: block; font-size: 12px; font-weight: 700; }
+
+    .stage {
+      position: relative; border-radius: 28px; border: 1px solid rgba(255,255,255,.65);
+      background: linear-gradient(145deg, rgba(255,255,255,.84), rgba(255,255,255,.58));
+      box-shadow: 0 30px 80px rgba(14,28,36,.1);
+      min-height: 580px; padding: 28px 28px 24px; overflow: hidden;
+    }
+    .act { display: none; animation: rise .45s ease; }
+    .act.is-on { display: block; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: none; }
+    }
+    .eyebrow {
+      margin: 0 0 10px; font-family: var(--mono); font-size: 12px;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--teal);
+    }
+    .title {
+      margin: 0; font-family: var(--display); font-weight: 900;
+      font-size: clamp(24px, 3.3vw, 34px); line-height: 1.25;
+    }
+    .title em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--teal), var(--mint));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .lead { margin: 12px 0 0; color: var(--muted); font-size: 15px; line-height: 1.75; max-width: 60em; }
+
+    .sim-board {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 14px;
+    }
+    .chart-card {
+      border-radius: 22px;
+      border: 1px solid rgba(13,124,120,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(236,246,244,.9));
+      padding: 16px;
+      opacity: .35;
+      filter: saturate(.4);
+      transition: opacity .45s ease, filter .45s ease, transform .45s ease;
+      transform: translateY(8px);
+    }
+    .chart-card.is-ready {
+      opacity: 1;
+      filter: none;
+      transform: none;
+    }
+    .chart-card h3 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--teal-deep);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .chart-card h3 span {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: .04em;
+    }
+    .chart-wrap { position: relative; height: 240px; }
+    .chart-wrap canvas { width: 100% !important; height: 100% !important; }
+    .in-kpis {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .in-kpis .cell {
+      border-radius: 14px; padding: 10px 12px;
+      background: rgba(255,255,255,.85);
+      border: 1px solid rgba(14,28,36,.08);
+      opacity: 0; transform: translateY(10px);
+      transition: .4s ease;
+    }
+    .in-kpis .cell.is-on { opacity: 1; transform: none; }
+    .in-kpis .k { font-size: 11px; color: var(--muted); }
+    .in-kpis .v { margin-top: 4px; font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--teal-deep); }
+    .mod.is-run {
+      border-color: rgba(31,157,114,.45);
+      box-shadow: 0 14px 30px rgba(31,157,114,.16);
+    }
+    .mod .hit {
+      margin-top: 8px; font-family: var(--mono); font-size: 11px; color: var(--teal-deep); font-weight: 700;
+    }
+    .pulse-dot {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--mint); margin-right: 6px; vertical-align: middle;
+      box-shadow: 0 0 0 0 rgba(31,157,114,.5);
+      animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(31,157,114,.45); }
+      70% { box-shadow: 0 0 0 10px rgba(31,157,114,0); }
+      100% { box-shadow: 0 0 0 0 rgba(31,157,114,0); }
+    }
+    @media (max-width: 980px) {
+      .sim-board { grid-template-columns: 1fr; }
+      .in-kpis { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .legend {
+      margin-top: 22px; border-radius: 22px; padding: 18px;
+      border: 1px solid rgba(13,124,120,.15);
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(240,248,247,.88));
+    }
+    .legend h3 { margin: 0 0 14px; font-size: 13px; font-weight: 700; color: var(--teal-deep); }
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .node {
+      border-radius: 16px; padding: 12px 14px; min-width: 86px; text-align: center;
+      font-size: 12px; font-weight: 700; border: 1px solid rgba(14,28,36,.12);
+      background: rgba(255,255,255,.9); box-shadow: 0 8px 20px rgba(14,28,36,.05);
+    }
+    .node .s { display: block; margin-top: 5px; font-size: 10px; font-weight: 500; color: var(--muted); font-family: var(--mono); }
+    .node.bio {
+      border-color: rgba(13,124,120,.28);
+      background: linear-gradient(160deg, #e8f8f5, #fff);
+      color: var(--teal-deep);
+    }
+    .arr { font-family: var(--mono); color: rgba(13,124,120,.5); width: 20px; text-align: center; }
+    .flow-board {
+      margin-top: 18px;
+      border-radius: 22px;
+      padding: 16px;
+      border: 1px solid rgba(13,124,120,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(236,246,244,.9));
+    }
+    .flow-board h3, .wq-board h3 {
+      margin: 0 0 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--teal-deep);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .flow-board h3 span, .wq-board h3 span {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: .04em;
+    }
+    .train-grid {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(0, 1fr));
+      gap: 8px;
+      width: 100%;
+    }
+    .train-item {
+      min-width: 0;
+      border-radius: 12px;
+      border: 1px solid rgba(14,28,36,.1);
+      background: #fff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 18px rgba(14,28,36,.05);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .train-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(14,28,36,.1);
+    }
+    .train-item.is-bio {
+      border-color: rgba(13,124,120,.35);
+      box-shadow: 0 8px 18px rgba(13,124,120,.1);
+    }
+    .train-item img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      background: #eef3f6;
+    }
+    .train-item span {
+      display: block;
+      padding: 10px 4px 12px;
+      text-align: center;
+      font-size: clamp(12px, 1.1vw, 14px);
+      font-weight: 600;
+      line-height: 1.35;
+      color: var(--ink);
+    }
+    @media (min-width: 1400px) {
+      .train-item img { aspect-ratio: 1 / 0.92; }
+      .stage { min-height: 640px; padding: 32px 36px 28px; }
+    }
+    .train-item.is-bio span { color: var(--teal-deep); }
+
+    .wq-board {
+      margin-top: 12px;
+      border-radius: 22px;
+      padding: 16px;
+      border: 1px solid rgba(14,28,36,.1);
+      background: rgba(255,255,255,.88);
+      display: flex;
+      flex-direction: column;
+    }
+    .wq-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .wq-card {
+      border-radius: 16px;
+      padding: 12px;
+      border: 1px solid rgba(14,28,36,.08);
+      background: #f7fafb;
+    }
+    .wq-card.in { background: linear-gradient(160deg, #f3f6f8, #fff); }
+    .wq-card.out { background: linear-gradient(160deg, #eefaf3, #fff); border-color: rgba(31,157,114,.22); }
+    .wq-card .tag {
+      font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--muted);
+    }
+    .wq-card.out .tag { color: var(--mint); }
+    .wq-card .q {
+      margin-top: 6px; font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -.03em;
+    }
+    .wq-card .u { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .wq-table {
+      width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 2px;
+    }
+    .wq-table th, .wq-table td {
+      padding: 8px 6px; border-bottom: 1px solid rgba(14,28,36,.08); text-align: left;
+    }
+    .wq-table th { color: var(--muted); font-weight: 600; font-size: 11px; }
+    .wq-table td.mono { font-family: var(--mono); font-weight: 700; }
+    .wq-table .ok { color: var(--mint); }
+    .wq-table .lim { color: var(--muted); font-weight: 500; }
+    .vol-hero {
+      margin-top: 22px; display: grid; grid-template-columns: 1.15fr .85fr; gap: 18px; align-items: stretch;
+    }
+    .mega-wrap {
+      border-radius: 24px; padding: 22px;
+      background: linear-gradient(145deg, rgba(14,28,36,.94), #13454a 55%, #0d7c78);
+      color: #fff; box-shadow: 0 24px 50px rgba(13,124,120,.28); position: relative; overflow: hidden;
+      display: flex; flex-direction: column; justify-content: space-between; gap: 14px;
+    }
+    .mega {
+      font-family: var(--mono); font-size: clamp(52px, 9vw, 88px); font-weight: 700;
+      letter-spacing: -.05em; line-height: .92;
+    }
+    .mega-cap { margin-top: 10px; font-size: 14px; opacity: .88; line-height: 1.5; }
+    .derive-box {
+      margin-top: 4px; padding: 12px 14px; border-radius: 16px;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
+      font-size: 13px; line-height: 1.65;
+    }
+    .derive-box b { color: #8dffc9; font-family: var(--mono); }
+    .seg-panel {
+      border-radius: 22px; padding: 16px;
+      border: 1px solid rgba(13,124,120,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(236,246,244,.9));
+    }
+    .seg-panel h3 {
+      margin: 0 0 12px; font-size: 13px; font-weight: 700; color: var(--teal-deep);
+      display: flex; justify-content: space-between; gap: 8px; align-items: baseline;
+    }
+    .seg-panel h3 span {
+      font-family: var(--mono); font-size: 10px; font-weight: 500; color: var(--muted);
+    }
+    .seg-bars { display: grid; gap: 10px; }
+    .seg-row {
+      display: grid; grid-template-columns: 58px 1fr 70px; gap: 8px; align-items: center; font-size: 12px;
+      padding: 6px 8px; border-radius: 12px;
+    }
+    .seg-row.is-hot {
+      background: rgba(13,124,120,.08);
+      border: 1px solid rgba(13,124,120,.22);
+    }
+    .seg-row .track {
+      height: 14px; border-radius: 999px; background: rgba(14,28,36,.06); overflow: hidden;
+    }
+    .seg-row .fill {
+      height: 100%; width: 0; border-radius: inherit;
+      background: linear-gradient(90deg, #0d7c78, #1f9d72);
+      transition: width 1s cubic-bezier(.2,.8,.2,1);
+    }
+    .seg-row.is-hot .fill {
+      background: linear-gradient(90deg, #b45309, #f59e0b);
+    }
+    .seg-row .n { font-family: var(--mono); font-weight: 700; text-align: right; color: var(--teal-deep); }
+    .seg-note {
+      margin: 12px 0 0; font-size: 12px; color: var(--muted); line-height: 1.55;
+      padding: 10px 12px; border-radius: 12px; background: rgba(180,83,9,.08);
+      border: 1px solid rgba(180,83,9,.18);
+    }
+    .seg-note b { color: #9a3412; font-family: var(--mono); }
+
+    .assemble {
+      margin-top: 20px; min-height: 280px; border-radius: 24px;
+      border: 1px solid rgba(13,124,120,.18);
+      background:
+        radial-gradient(500px 200px at 20% 0%, rgba(13,124,120,.1), transparent 50%),
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(236,246,244,.9));
+      padding: 18px; position: relative; overflow: hidden;
+    }
+    .status-line {
+      position: absolute; right: 18px; top: 16px; z-index: 2;
+      font-family: var(--mono); font-size: 11px; color: var(--teal-deep);
+      padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,.8);
+      border: 1px solid rgba(13,124,120,.2);
+    }
+    .modules { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 12px; min-height: 130px; }
+    .mod {
+      width: min(168px, calc(50% - 8px)); border-radius: 18px; padding: 14px; background: rgba(255,255,255,.9);
+      border: 1px solid rgba(13,124,120,.16); box-shadow: 0 14px 30px rgba(14,28,36,.08);
+      opacity: 0; transform: translateY(20px) scale(.94); transition: .5s ease;
+    }
+    .mod.is-in { opacity: 1; transform: none; }
+    .mod .t { font-size: 13px; font-weight: 700; }
+    .mod .d { margin-top: 6px; font-size: 11px; color: var(--muted); line-height: 1.45; }
+    .mod .tag {
+      display: inline-block; margin-top: 10px; font-family: var(--mono); font-size: 10px; color: #fff;
+      background: linear-gradient(120deg, var(--teal), var(--mint)); padding: 3px 7px; border-radius: 999px;
+    }
+    .wire {
+      position: relative; z-index: 1; margin-top: 16px; font-family: var(--mono); font-size: 12px;
+      white-space: pre-wrap; min-height: 78px; border-radius: 16px; padding: 12px 14px;
+      background: rgba(14,28,36,.9); color: #b7f0e4; line-height: 1.7;
+    }
+
+    /* AI 自动给出缩容结果（无滑块） */
+    .reveal {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+    }
+    .result-card {
+      border-radius: 24px; padding: 22px;
+      background: linear-gradient(160deg, rgba(14,28,36,.95), #0f4d4a 60%, #127a5f);
+      color: #fff; box-shadow: 0 24px 50px rgba(13,124,120,.25);
+    }
+    .result-card .k {
+      font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+      opacity: .75; font-family: var(--mono);
+    }
+    .fromto {
+      margin-top: 10px; font-family: var(--mono);
+      font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -.03em;
+    }
+    .fromto em { font-style: normal; color: #8dffc9; }
+    .range { margin-top: 12px; font-size: 13px; line-height: 1.7; opacity: .9; }
+    .bar-compare { margin-top: 18px; }
+    .bar-compare .row {
+      display: grid; grid-template-columns: 44px 1fr 64px; gap: 8px;
+      align-items: center; margin-bottom: 8px; font-size: 12px;
+    }
+    .bar-compare .track {
+      height: 12px; border-radius: 999px; background: rgba(255,255,255,.15); overflow: hidden;
+    }
+    .bar-compare .fill { height: 100%; border-radius: inherit; transition: width .9s cubic-bezier(.2,.8,.2,1); }
+    .fill.trad { width: 100%; background: rgba(255,255,255,.45); }
+    .fill.ai { width: 0; background: linear-gradient(90deg, #7dfff0, #8dffc9); }
+
+    .param-panel {
+      border-radius: 22px; padding: 16px;
+      border: 1px solid rgba(13,124,120,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(236,246,244,.9));
+      overflow: auto;
+    }
+    .param-panel h3 {
+      margin: 0 0 12px; font-size: 13px; font-weight: 700; color: var(--teal-deep);
+    }
+    .param-table {
+      width: 100%; border-collapse: collapse; font-size: 12px;
+    }
+    .param-table th, .param-table td {
+      padding: 10px 8px; border-bottom: 1px solid rgba(14,28,36,.08);
+      text-align: left; vertical-align: top; line-height: 1.45;
+    }
+    .param-table th {
+      color: var(--muted); font-weight: 600; font-size: 11px; white-space: nowrap;
+    }
+    .param-table td.mono { font-family: var(--mono); font-weight: 700; color: var(--teal-deep); }
+    .param-table tr:last-child td { border-bottom: none; }
+
+    .final-grid {
+      margin-top: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    }
+    .final-card {
+      border-radius: 22px; padding: 18px; background: rgba(255,255,255,.8);
+      border: 1px solid rgba(14,28,36,.08); box-shadow: 0 14px 30px rgba(14,28,36,.06);
+    }
+    .final-card .n {
+      font-family: var(--mono); font-size: 32px; font-weight: 700;
+      color: var(--teal-deep); letter-spacing: -.04em;
+    }
+    .final-card .c { margin-top: 6px; font-family: var(--display); font-size: 17px; font-weight: 700; }
+    .final-card .d { margin-top: 6px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    .checks {
+      margin-top: 14px; display: grid; gap: 6px; font-size: 12px;
+    }
+    .checks div {
+      display: flex; justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,.12); padding-bottom: 5px;
+    }
+    .ok { color: #8dffc9; font-family: var(--mono); font-weight: 700; }
+
+    .actions { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn {
+      appearance: none; border: 1px solid rgba(14,28,36,.12); background: rgba(255,255,255,.85);
+      border-radius: 999px; padding: 12px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+    .btn-primary { background: linear-gradient(120deg, #0e1c24, #13454a); color: #fff; border-color: transparent; }
+    .btn-teal {
+      background: linear-gradient(120deg, #0d7c78, #1f9d72); color: #fff; border-color: transparent;
+      box-shadow: 0 12px 28px rgba(13,124,120,.22);
+    }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+
+    @media (max-width: 900px) {
+      .rail { grid-template-columns: 1fr 1fr; }
+      .vol-hero, .reveal, .final-grid, .wq-pair { grid-template-columns: 1fr; }
+      .top { flex-direction: column; align-items: flex-start; }
+      .train-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      .train-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb a"></div>
+  <div class="orb b"></div>
+
+  <div class="wrap">
+    <header class="top">
+      <p class="brand-kicker">AI Process Twin · Showcase</p>
+      <h1>运行数据及其工艺的优化案例</h1>
+    </header>
+
+    <nav class="rail" id="progress"></nav>
+
+    <main class="stage">
+      <!-- 1 运行现状 -->
+      <section class="act is-on" data-i="0">
+        <p class="eyebrow">Step 01 · 现状</p>
+        <h2 class="title">污水处理厂A<em>运行现状</em></h2>
+
+        <div class="flow-board">
+          <h3>工艺流程图</h3>
+          <div class="train-grid" id="trainGrid"></div>
+        </div>
+
+        <div class="wq-board">
+          <h3>目前进出水状况 <span>单位 mg/L</span></h3>
+          <div class="wq-pair">
+            <div class="wq-card in">
+              <div class="tag">进水 · 流量</div>
+              <div class="q">60,000</div>
+              <div class="u">m³/d</div>
+            </div>
+            <div class="wq-card out">
+              <div class="tag">出水 · 现状</div>
+              <div class="q">一级 A</div>
+              <div class="u">达标运行</div>
+            </div>
+          </div>
+          <table class="wq-table">
+            <thead>
+              <tr>
+                <th>指标</th>
+                <th>进水</th>
+                <th>出水</th>
+                <th>一级A限值</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>COD</td>
+                <td class="mono">280</td>
+                <td class="mono ok">28</td>
+                <td class="mono lim">≤50</td>
+              </tr>
+              <tr>
+                <td>NH₄-N</td>
+                <td class="mono">28</td>
+                <td class="mono ok">1.2</td>
+                <td class="mono lim">≤5（8）</td>
+              </tr>
+              <tr>
+                <td>TN</td>
+                <td class="mono">35</td>
+                <td class="mono ok">9.8</td>
+                <td class="mono lim">≤15</td>
+              </tr>
+              <tr>
+                <td>TP</td>
+                <td class="mono">4.0</td>
+                <td class="mono ok">0.29</td>
+                <td class="mono lim">≤0.5</td>
+              </tr>
+              <tr>
+                <td>SS</td>
+                <td class="mono">160</td>
+                <td class="mono ok">6</td>
+                <td class="mono lim">≤10</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" data-go="1">下一步：模型仿真 →</button>
+        </div>
+      </section>
+
+      <!-- 2 模型仿真：逐模块加载 + 进水数据 -->
+      <section class="act" data-i="1">
+        <p class="eyebrow">Step 02 · 模型仿真</p>
+        <h2 class="title">模型仿真，解析 <em>进水数据</em></h2>
+
+        <div class="sim-board">
+          <div class="assemble" id="simAssemble">
+            <div class="status-line" id="buildStatus"><span class="pulse-dot"></span>等待加载…</div>
+            <div class="modules" id="modules"></div>
+            <div class="wire" id="wireLog"></div>
+          </div>
+
+          <div>
+            <div class="chart-card" id="inChartCard">
+              <h3>进水数据波动 <span>葛塘小时表 · 2026/07/01–07</span></h3>
+              <div class="chart-wrap"><canvas id="chartIn"></canvas></div>
+              <div class="in-kpis" id="inKpis">
+                <div class="cell" data-k="q"><div class="k">流量 Q</div><div class="v">60,000</div></div>
+                <div class="cell" data-k="cod"><div class="k">COD 均值</div><div class="v" id="kpiCod">—</div></div>
+                <div class="cell" data-k="tn"><div class="k">TN 均值</div><div class="v" id="kpiTn">—</div></div>
+                <div class="cell" data-k="tp"><div class="k">TP 均值</div><div class="v" id="kpiTp">—</div></div>
+              </div>
+            </div>
+            <div class="chart-card" id="outChartCard" style="margin-top:12px">
+              <h3>出水小时响应 <span>对照一级 A</span></h3>
+              <div class="chart-wrap"><canvas id="chartOut"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" data-go="0">返回现状</button>
+          <button class="btn btn-teal" id="btnToFind" data-go="2" disabled>模型就绪：发现问题 →</button>
+        </div>
+      </section>
+
+      <!-- 3 发现问题：容积推导 -->
+      <section class="act" data-i="2">
+        <p class="eyebrow">Step 03 · 发现问题</p>
+        <h2 class="title">模型推导：有效容积利用率 <em>不足</em></h2>
+        <p class="lead">仿真显示有效容积利用率不足。传统设计冗余度过高，需把总池容拆到五段上看冗余落点。</p>
+        <div class="vol-hero">
+          <div class="mega-wrap">
+            <div>
+              <div class="mega" id="volMega">0</div>
+              <div class="mega-cap">m³ · 现状生化总容积</div>
+            </div>
+            <div class="derive-box">
+              模型反演：当前进水负荷下，维持一级 A 达标所需理论有效容积仅为 <b>30,000 m³</b>，传统设计冗余度过高。
+            </div>
+          </div>
+          <div class="seg-panel">
+            <h3>五段池容分解 <span>与左侧结论联动</span></h3>
+            <div class="seg-bars" id="segBars"></div>
+            <p class="seg-note" id="segNote">核心冗余集中在好氧段（<b>24,000 m³</b>）。</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" data-go="1">返回仿真</button>
+          <button class="btn btn-primary" data-go="3">下一步：调试对比 →</button>
+        </div>
+      </section>
+
+      <!-- 4 调试对比 -->
+      <section class="act" data-i="3">
+        <p class="eyebrow">Step 04 · 调试对比</p>
+        <h2 class="title">AI 调试对比：池容缩减与 <em>参数重配</em></h2>
+        <p class="lead">保持进水条件与一级 A 达标约束，AI 重配工艺参数，释放冗余池容。</p>
+
+        <div class="reveal">
+          <div class="result-card">
+            <div class="k">池容缩减结果</div>
+            <div class="fromto">50,000 → <em id="needVol">30,000</em></div>
+            <div class="range">
+              可缩小范围约 <b>30,000～50,000 m³</b>。<br/>
+              AI 寻优落点：约 <b>30,000 m³</b>（↓40%）。
+            </div>
+            <div class="bar-compare">
+              <div class="row"><span>现状</span><div class="track"><div class="fill trad"></div></div><span>50,000</span></div>
+              <div class="row"><span>调试</span><div class="track"><div class="fill ai" id="fillAi"></div></div><span>30,000</span></div>
+            </div>
+            <div class="checks">
+              <div><span>硝化可行性</span><span class="ok">✅ 可行</span></div>
+              <div><span>反硝化可行性</span><span class="ok">✅ 可行</span></div>
+              <div><span>EBPR 除磷</span><span class="ok">✅ 可行</span></div>
+              <div><span>一级 A 约束</span><span class="ok">✅ 达标</span></div>
+            </div>
+          </div>
+
+          <div class="param-panel">
+            <h3>参数对比：原设定 → AI 优化</h3>
+            <table class="param-table">
+              <thead>
+                <tr>
+                  <th>参数维度</th>
+                  <th>原设定</th>
+                  <th>AI 优化后</th>
+                  <th>调整目的</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>MLSS 污泥浓度</td>
+                  <td class="mono">3,200 mg/L</td>
+                  <td class="mono">4,200 mg/L</td>
+                  <td>提升生物量，补偿容积</td>
+                </tr>
+                <tr>
+                  <td>内回流比 (r)</td>
+                  <td class="mono">100%</td>
+                  <td class="mono">180%</td>
+                  <td>稳定缺氧环境</td>
+                </tr>
+                <tr>
+                  <td>外回流比 (R)</td>
+                  <td class="mono">100%</td>
+                  <td class="mono">70%</td>
+                  <td>稳住厌氧除磷微环境</td>
+                </tr>
+                <tr>
+                  <td>污泥龄 (SRT)</td>
+                  <td class="mono">10 d</td>
+                  <td class="mono">14 d</td>
+                  <td>强化硝化反硝化</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="final-grid">
+          <div class="final-card">
+            <div class="n">↓40%</div>
+            <div class="c">池容缩减</div>
+            <div class="d">50,000 → 30,000 m³</div>
+          </div>
+          <div class="final-card">
+            <div class="n">弹性</div>
+            <div class="c">以工艺弹性替代工程冗余</div>
+            <div class="d">参数重配释放池容，不必堆工程量</div>
+          </div>
+          <div class="final-card">
+            <div class="n">一级A</div>
+            <div class="c">约束不放松</div>
+            <div class="d">调试后出水仍满足限值</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" data-go="2">返回问题</button>
+          <button class="btn btn-teal" data-go="0">从头演示</button>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script>
+    if (typeof Chart === "undefined") {
+      document.body.innerHTML = "<p style='padding:40px;font-family:sans-serif'>缺少本地 chart.umd.min.js，请与本 HTML 放在同一文件夹后再打开。</p>";
+      throw new Error("Chart.js missing");
+    }
+
+    const TRAD_V = 50000, AI_V = 30000;
+    const TRAIN = [
+      { name: "格栅", img: "./img/unit_screen.jpg", bio: false },
+      { name: "初沉", img: "./img/unit_primary.jpg", bio: false },
+      { name: "厌氧", img: "./img/unit_anaerobic.jpg", bio: true },
+      { name: "缺氧", img: "./img/unit_anoxic.jpg", bio: true },
+      { name: "好氧", img: "./img/unit_aerobic.jpg", bio: true },
+      { name: "二沉", img: "./img/unit_secondary.jpg", bio: false },
+      { name: "高效沉淀", img: "./img/unit_hes.jpg", bio: false },
+      { name: "深床滤池", img: "./img/unit_filter.jpg", bio: false },
+      { name: "次钠消毒", img: "./img/unit_disinfect.jpg", bio: false },
+    ];
+    const SHARES = [
+      { name: "厌氧", p: 0.08 }, { name: "缺氧1", p: 0.22 }, { name: "好氧", p: 0.48 },
+      { name: "缺氧2", p: 0.16 }, { name: "后好氧", p: 0.06 },
+    ];
+    const labels = ["运行现状", "模型仿真", "发现问题", "调试对比"];
+
+    function avg(arr) {
+      return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+    function peak(arr) {
+      return Math.max(...arr);
+    }
+
+    // 葛塘「03_进出水仪表_小时表」连续 7×24h：2026-07-01 ~ 07-07
+    // 落盘：demo/sample_getang_7d_hourly.csv
+    const AXIS_DATES = ['07/01','07/02','07/03','07/04','07/05','07/06','07/07'];
+    const AXIS_LABELS = Array.from({length:168}, (_,i)=>AXIS_DATES[Math.floor(i/24)]);
+    const IN_COD = [295.9,309.8,309.8,214.2,214.2,500,500,321.3,321.3,232.7,232.7,299.2,299.2,383.8,383.8,500,500,286.7,286.7,306.6,306.6,500,500,266.3,266.3,267.2,267.2,287.5,287.5,364.3,364.3,452.6,452.6,313.8,313.8,291.2,291.2,268.3,268.3,331.1,331.1,249.3,249.3,249.9,249.9,339.6,339.6,227.8,227.8,256.9,256.9,290.6,290.6,303.2,303.2,173.3,173.3,139.5,139.5,195.6,195.6,214,214,353.9,353.9,202.3,202.3,130.4,130.4,193.8,193.8,500,500,168.2,168.2,165,165,500,500,271.5,271.5,149.2,149.2,133.1,133.1,500,500,500,500,192.7,192.7,161.6,161.6,274.6,274.6,173.6,173.6,182,182,177.8,177.8,223.9,223.9,220.9,220.9,131.4,131.4,256.3,256.3,260.5,260.5,200.3,200.3,258.8,258.8,296.5,296.5,455.9,455.9,230.4,230.4,208,208,208,242.8,500,500,234.4,234.4,304.5,304.5,277.7,277.7,500,500,500,500,183,183,256.3,256.3,230.4,230.4,258,258,298.3,298.3,274.7,274.7,179.5,179.5,264.3,264.3,321.7,321.7,294.1,294.1,230.1,230.1,500,500,383.8,383.8,241.6,241.6,500,500,340.2];
+    const IN_TN = [39.54,42.02,42.02,41.55,41.55,43.17,43.17,33.02,33.02,34.9,34.9,35.48,35.48,43.38,43.38,47.55,47.55,42.52,42.52,46.1,46.1,37.57,37.57,41.62,41.62,42.72,42.72,43.72,43.72,39.82,39.82,39.11,39.11,32.18,32.18,35.21,35.21,39.78,39.78,47.11,47.11,41.23,41.23,43.01,43.01,63.14,63.14,40.19,40.19,41.53,41.53,41.98,41.98,38.7,38.7,31.75,31.75,23.12,23.12,17.46,17.46,18.41,18.41,20.32,20.32,16.27,16.27,16.85,16.85,16.89,16.89,18.92,18.92,21.26,21.26,25.16,25.16,27.11,27.11,22.16,22.16,21.69,21.69,19.39,19.39,23.72,23.72,29.52,29.52,26.86,26.86,30.05,30.05,30.35,30.35,27.62,27.62,29.61,29.61,32.69,32.69,30.82,30.82,30.99,30.99,31.53,31.53,26.85,26.85,34.13,34.13,38.6,38.6,38.77,38.77,35.9,35.9,41.05,41.05,34.9,34.9,37.86,37.86,34.17,34.17,38,38,38,38,30.65,30.65,32.89,32.89,38.59,38.59,39.89,39.89,36.5,36.5,37.37,37.37,35.03,35.03,35.46,35.46,37.85,37.85,39.05,39.05,36.56,36.56,38.54,38.54,34.84,34.84,34.65,34.65,40.18,40.18,40.74,40.74,39.18,39.18,33.65,33.65,35.85,35.85,32.75];
+    const IN_TP = [4.231,3.969,3.969,3.856,3.856,3.943,3.943,3.465,3.465,2.896,2.896,3.214,3.214,3.988,3.988,4.433,4.433,4.126,4.126,4.148,4.148,3.618,3.618,3.982,3.982,4.316,4.316,3.963,3.963,3.663,3.663,3.871,3.871,2.801,2.801,3.096,3.096,3.764,3.764,4.169,4.169,4.075,4.075,4.111,4.111,4.071,4.071,4.284,4.284,4.113,4.113,4.152,4.152,3.721,3.721,2.783,2.783,2.232,2.232,1.967,1.967,1.937,1.937,2.219,2.219,2.296,2.296,1.827,1.827,1.858,1.858,1.85,1.85,1.967,1.967,2.27,2.27,2.35,2.35,2.153,2.153,1.99,1.99,2.091,2.091,2.631,2.631,3.184,3.184,2.922,2.922,3.244,3.244,3.328,3.328,3.114,3.114,3.44,3.44,3.375,3.375,3.152,3.152,2.96,2.96,4.342,4.342,2.231,2.231,3.047,3.047,3.522,3.522,3.809,3.809,3.809,3.809,3.957,3.957,3.652,3.652,3.819,3.819,3.62,3.62,3.669,3.669,3.669,3.669,2.844,2.844,2.585,2.585,3.365,3.365,3.551,3.551,3.34,3.34,4.05,4.05,3.784,3.784,3.846,3.846,4.006,4.006,3.886,3.886,3.594,3.594,3.663,3.663,3.385,3.385,3.04,3.04,3.93,3.93,4.104,4.104,3.794,3.794,3.305,3.305,3.729,3.729,3.422];
+    const OUT_COD = [8.69,8.62,8.62,8.81,8.69,8.81,8.75,8.75,8.56,8.62,8.69,8.38,8.19,8.38,8.56,8.44,8.81,8.75,8.75,8.94,8.94,9.06,8.81,8.81,8.56,8.69,8.69,8.75,8.81,9,9,8.94,8.81,8.56,8.44,8.38,8.25,8.25,8.31,8.44,8.38,8.5,8.56,8.5,8.56,8.5,8.5,8.69,8.44,8.44,8.5,8.5,8.56,8.5,8.69,8.69,8.75,8.69,9.25,8.81,8.88,9,8.94,9,9.12,8.75,8.81,8.69,8.56,8.5,8.5,8.38,8.25,8.06,8,8,7.94,7.91,8.06,7.94,8,7.94,8.44,8.25,8.25,8.38,8.25,8.06,8.19,8,8.12,7.97,8.06,7.97,8,8.06,7.91,8,8.06,8.12,8.31,8.25,8.25,8.31,8.25,8.06,8,8.06,8,7.88,7.91,7.75,7.81,7.84,7.78,7.94,7.81,7.94,7.88,7.88,7.94,8,8.06,8.06,8.06,8.25,8.19,8.12,8,8.12,8,8,7.94,8,8,8.06,8.06,8.06,8.12,7.97,8,8.25,8.12,8.06,8,8,8,8.06,8.06,8.06,8.19,8,8.12,8.06,7.97,8.06,8.06,8.56,9.56,0.84,0.84,0.84,0.84,0.84,8.44,8.31,8.12,8.06];
+    const OUT_TN = [6.03,6.22,6.62,7.04,7.45,7.69,7.93,8.02,8.02,8.02,8.07,8.08,8.03,8.16,7.87,7.89,7.64,7.55,7.18,6.79,6.33,5.9,5.73,5.81,6.11,6.53,6.99,7.45,7.76,7.95,8.06,7.96,7.85,7.85,7.75,7.73,7.78,7.86,7.89,7.79,7.66,7.42,7.15,6.77,6.45,6.21,5.92,5.86,6.12,6.57,7.09,7.5,7.84,8.05,8.18,8.12,7.99,7.99,7.79,7.87,7.99,7.94,7.99,7.95,7.83,7.58,7.17,6.74,6.21,5.65,5.09,4.53,4.36,4.36,4.36,3,2.64,2.45,2.45,2.45,2.42,2.42,2.68,2.87,3.18,3.57,3.97,4.18,4.22,4.18,4.19,4.09,3.93,3.82,3.92,4.02,4.37,4.4,4.65,4.97,5.22,5.32,5.39,5.39,5.4,5.4,5.58,5.73,5.85,5.96,6.17,6.14,6.09,5.98,5.7,5.47,5.21,4.86,4.69,4.68,4.73,4.96,5.25,5.61,6.01,6.23,6.4,6.56,6.62,6.62,6.73,6.74,6.69,6.67,6.59,6.58,6.54,6.05,6.09,5.87,5.6,5.58,5.62,5.92,6.27,6.75,7.03,7.46,7.78,8.04,7.98,7.87,7.75,7.75,7.61,7.62,7.54,7.49,7.29,7.41,7.41,7.41,7.41,7.41,6.26,6.68,6.43,6.39];
+    const OUT_TP = [0.032,0.032,0.032,0.032,0.031,0.031,0.031,0.031,0.03,0.03,0.031,0.029,0.029,0.029,0.029,0.03,0.03,0.031,0.032,0.032,0.033,0.034,0.034,0.033,0.032,0.032,0.032,0.032,0.033,0.033,0.033,0.033,0.032,0.032,0.033,0.031,0.03,0.03,0.03,0.03,0.031,0.031,0.031,0.031,0.032,0.032,0.033,0.033,0.033,0.033,0.033,0.033,0.033,0.033,0.033,0.033,0.034,0.034,0.035,0.035,0.035,0.035,0.035,0.035,0.034,0.034,0.034,0.035,0.035,0.035,0.035,0.035,0.034,0.034,0.034,0.035,0.033,0.033,0.034,0.034,0.034,0.034,0.038,0.038,0.04,0.041,0.043,0.045,0.047,0.049,0.051,0.054,0.057,0.06,0.063,0.065,0.066,0.068,0.068,0.071,0.072,0.074,0.075,0.077,0.075,0.075,0.074,0.071,0.069,0.067,0.066,0.063,0.062,0.061,0.061,0.061,0.061,0.061,0.061,0.061,0.061,0.061,0.061,0.061,0.061,0.061,0.06,0.06,0.058,0.058,0.058,0.055,0.054,0.052,0.051,0.051,0.049,0.051,0.05,0.05,0.05,0.05,0.051,0.051,0.049,0.048,0.048,0.048,0.048,0.047,0.048,0.047,0.047,0.047,0.047,0.046,0.045,0.051,0.065,0.065,0.065,0.075,0.076,0.075,0.046,0.044,0.043,0.042];
+
+    const KPI = {
+      cod: avg(IN_COD).toFixed(0),
+      tn: avg(IN_TN).toFixed(1),
+      tp: avg(IN_TP).toFixed(2),
+      codPeak: Math.round(peak(IN_COD)),
+      tnPeak: peak(IN_TN).toFixed(1),
+      tpPeak: peak(IN_TP).toFixed(2),
+    };
+
+    const MODS = [
+      { t: "流量模块", d: "挂接小时流量口径", tag: "Q", hit: "60,000 m³/d", kpi: "q", ds: null },
+      { t: "COD 进水", d: "读取 7×24h COD", tag: "COD", hit: `峰值 ${KPI.codPeak}`, kpi: "cod", ds: 0 },
+      { t: "总氮进水", d: "读取 7×24h TN", tag: "TN", hit: `峰值 ${KPI.tnPeak}`, kpi: "tn", ds: 1 },
+      { t: "总磷进水", d: "读取 7×24h TP", tag: "TP", hit: `峰值 ${KPI.tpPeak}`, kpi: "tp", ds: 2 },
+      { t: "负荷核算", d: "Q × 浓度 → 需氧/氮磷负荷", tag: "Ns", hit: "余量偏大", kpi: null, ds: null },
+      { t: "出水响应", d: "一级 A 对照，余量扫描", tag: "Out", hit: "对照限值", kpi: null, ds: "out" },
+    ];
+
+    let step = 0, unlocked = 0, simReady = false, simGen = 0;
+    let charts = { out: null, inn: null };
+    const progress = document.getElementById("progress");
+
+    function renderProgress() {
+      progress.innerHTML = labels.map((t, i) => `
+        <button class="${i === step ? "is-on" : ""}" data-jump="${i}" ${i > unlocked ? "disabled" : ""}>
+          <span class="n">0${i + 1}</span><span class="l">${t}</span>
+        </button>`).join("");
+      progress.querySelectorAll("[data-jump]").forEach((b) => b.onclick = () => go(+b.dataset.jump));
+    }
+
+    function renderTrain() {
+      const box = document.getElementById("trainGrid");
+      if (!box) return;
+      box.innerHTML = TRAIN.map((u) => `
+        <article class="train-item ${u.bio ? "is-bio" : ""}">
+          <img src="${u.img}" alt="${u.name}" />
+          <span>${u.name}</span>
+        </article>
+      `).join("");
+    }
+
+    function chartCommon() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 650 },
+        plugins: {
+          legend: { labels: { boxWidth: 10, font: { size: 11 } } },
+        },
+        scales: {
+          x: { grid: { color: "rgba(19,32,40,0.05)" }, ticks: { font: { size: 10 } } },
+          y: { grid: { color: "rgba(19,32,40,0.06)" }, ticks: { font: { size: 10 } } },
+        },
+      };
+    }
+
+    function destroyCharts() {
+      if (charts.inn) { charts.inn.destroy(); charts.inn = null; }
+      if (charts.out) { charts.out.destroy(); charts.out = null; }
+    }
+
+    function dateTick(value, index) {
+      return index % 24 === 12 ? AXIS_DATES[Math.floor(index / 24)] : "";
+    }
+
+    function initEmptyCharts() {
+      destroyCharts();
+      const common = chartCommon();
+      const n = AXIS_LABELS.length;
+      const empty = () => Array(n).fill(null);
+      charts.inn = new Chart(document.getElementById("chartIn"), {
+        type: "line",
+        data: {
+          labels: AXIS_LABELS,
+          datasets: [
+            {
+              label: "进水 COD",
+              data: empty(),
+              borderColor: "#13454a",
+              backgroundColor: "rgba(19,69,74,0.08)",
+              fill: true, tension: 0, pointRadius: 0, borderWidth: 1.4,
+              spanGaps: false,
+            },
+            {
+              label: "进水 TN",
+              data: empty(),
+              borderColor: "#0d7c78",
+              tension: 0, pointRadius: 0, borderWidth: 1.3,
+              yAxisID: "y1", spanGaps: false,
+            },
+            {
+              label: "进水 TP",
+              data: empty(),
+              borderColor: "#7c3aed",
+              tension: 0, pointRadius: 0, borderWidth: 1.3,
+              yAxisID: "y2", spanGaps: false,
+            },
+          ],
+        },
+        options: {
+          ...common,
+          animation: { duration: 450 },
+          scales: {
+            x: {
+              grid: { color: "rgba(19,32,40,0.04)" },
+              ticks: { font: { size: 12 }, maxRotation: 0, autoSkip: false, callback: dateTick },
+            },
+            y: { ...common.scales.y, suggestedMin: 100, suggestedMax: 520, title: { display: true, text: "COD", font: { size: 10 } } },
+            y1: {
+              position: "right",
+              grid: { drawOnChartArea: false },
+              ticks: { font: { size: 10 } },
+              suggestedMin: 10, suggestedMax: 70,
+              title: { display: true, text: "TN", font: { size: 10 } },
+            },
+            y2: {
+              position: "right",
+              offset: true,
+              grid: { drawOnChartArea: false },
+              ticks: { font: { size: 10 } },
+              suggestedMin: 1.5, suggestedMax: 5,
+              title: { display: true, text: "TP", font: { size: 10 } },
+            },
+          },
+        },
+      });
+      charts.out = new Chart(document.getElementById("chartOut"), {
+        type: "line",
+        data: {
+          labels: AXIS_LABELS,
+          datasets: [
+            {
+              label: "出水 COD",
+              data: empty(),
+              borderColor: "#13454a",
+              backgroundColor: "rgba(19,69,74,0.08)",
+              fill: true, tension: 0, pointRadius: 0, borderWidth: 1.4, spanGaps: false,
+            },
+            {
+              label: "出水 TN",
+              data: empty(),
+              borderColor: "#1f9d72",
+              tension: 0, pointRadius: 0, borderWidth: 1.3, spanGaps: false,
+            },
+            {
+              label: "出水 TP",
+              data: empty(),
+              borderColor: "#7c3aed",
+              tension: 0, pointRadius: 0, borderWidth: 1.3,
+              yAxisID: "y1", spanGaps: false,
+            },
+            {
+              label: "COD 限值 50",
+              data: Array(n).fill(50),
+              borderColor: "rgba(180,35,24,0.4)",
+              borderDash: [5, 4], pointRadius: 0, borderWidth: 1.1,
+            },
+            {
+              label: "TN 限值 15",
+              data: Array(n).fill(15),
+              borderColor: "rgba(31,157,114,0.45)",
+              borderDash: [4, 4], pointRadius: 0, borderWidth: 1.1,
+            },
+            {
+              label: "TP 限值 0.5",
+              data: Array(n).fill(0.5),
+              borderColor: "rgba(124,58,237,0.45)",
+              borderDash: [5, 4], pointRadius: 0, borderWidth: 1.1,
+              yAxisID: "y1",
+            },
+          ],
+        },
+        options: {
+          ...common,
+          animation: { duration: 450 },
+          scales: {
+            x: {
+              grid: { color: "rgba(19,32,40,0.04)" },
+              ticks: { font: { size: 12 }, maxRotation: 0, autoSkip: false, callback: dateTick },
+            },
+            y: { ...common.scales.y, suggestedMin: 0, suggestedMax: 55, title: { display: true, text: "COD / TN", font: { size: 10 } } },
+            y1: {
+              position: "right",
+              grid: { drawOnChartArea: false },
+              ticks: { font: { size: 10 } },
+              suggestedMin: 0, suggestedMax: 0.55,
+              title: { display: true, text: "TP", font: { size: 10 } },
+            },
+          },
+        },
+      });
+    }
+
+    function revealInSeries(dsIndex, values) {
+      if (!charts.inn) return;
+      charts.inn.data.datasets[dsIndex].data = values.slice();
+      charts.inn.update();
+    }
+
+    function revealOutSeries() {
+      if (!charts.out) return;
+      charts.out.data.datasets[0].data = OUT_COD.slice();
+      charts.out.data.datasets[1].data = OUT_TN.slice();
+      charts.out.data.datasets[2].data = OUT_TP.slice();
+      charts.out.update();
+      document.getElementById("outChartCard").classList.add("is-ready");
+    }
+
+    function startAssemble() {
+      const gen = ++simGen;
+      simReady = false;
+      const box = document.getElementById("modules");
+      const log = document.getElementById("wireLog");
+      const status = document.getElementById("buildStatus");
+      const next = document.getElementById("btnToFind");
+      const inCard = document.getElementById("inChartCard");
+      const outCard = document.getElementById("outChartCard");
+      next.disabled = true;
+      inCard.classList.remove("is-ready");
+      outCard.classList.remove("is-ready");
+      document.querySelectorAll("#inKpis .cell").forEach((c) => c.classList.remove("is-on"));
+      document.getElementById("kpiCod").textContent = KPI.cod;
+      document.getElementById("kpiTn").textContent = KPI.tn;
+      document.getElementById("kpiTp").textContent = KPI.tp;
+      box.innerHTML = "";
+      log.textContent = "› 载入葛塘小时表 2026-07-01~07（7×24h）…";
+      status.innerHTML = '<span class="pulse-dot"></span>加载中…';
+      initEmptyCharts();
+
+      MODS.forEach((m) => {
+        const div = document.createElement("div");
+        div.className = "mod";
+        div.innerHTML = `<div class="t">${m.t}</div><div class="d">${m.d}</div><div class="tag">${m.tag}</div><div class="hit"></div>`;
+        box.appendChild(div);
+      });
+
+      const lines = [
+        "› 读取进水流量 Q = 60,000 m³/d…",
+        `› 注入 7×24h COD，峰值 ${KPI.codPeak}…`,
+        `› 读取 7×24h TN，峰值 ${KPI.tnPeak}…`,
+        `› 读取 7×24h TP，峰值 ${KPI.tpPeak}…`,
+        "› 完成负荷核算 Ns…",
+        "› 跑通出水响应：对照一级 A。",
+      ];
+      const seriesMap = [IN_COD, IN_TN, IN_TP];
+
+      MODS.forEach((m, i) => {
+        setTimeout(() => {
+          if (gen !== simGen) return;
+          const el = box.children[i];
+          if (!el) return;
+          el.classList.add("is-in", "is-run");
+          el.querySelector(".hit").textContent = m.hit;
+          status.innerHTML = `<span class="pulse-dot"></span>模块 ${i + 1}/${MODS.length} · ${m.t}`;
+          log.textContent += (log.textContent ? "\n" : "") + lines[i];
+
+          if (m.kpi) {
+            const cell = document.querySelector(`#inKpis .cell[data-k="${m.kpi}"]`);
+            if (cell) cell.classList.add("is-on");
+            inCard.classList.add("is-ready");
+          }
+          if (typeof m.ds === "number") {
+            revealInSeries(m.ds, seriesMap[m.ds]);
+          }
+          if (m.ds === "out") revealOutSeries();
+
+          box.querySelectorAll(".mod").forEach((node, j) => {
+            if (j !== i) node.classList.remove("is-run");
+          });
+
+          if (i === MODS.length - 1) {
+            simReady = true;
+            status.innerHTML = '<span class="pulse-dot"></span>模型在线 · 进水解析完成';
+            next.disabled = false;
+            setTimeout(() => { if (gen === simGen) el.classList.remove("is-run"); }, 400);
+          }
+        }, 320 + i * 520);
+      });
+    }
+
+    function go(i) {
+      step = i;
+      unlocked = Math.max(unlocked, i);
+      renderProgress();
+      document.querySelectorAll(".act").forEach((el) => el.classList.toggle("is-on", +el.dataset.i === i));
+      if (i === 0) renderTrain();
+      if (i === 1) {
+        requestAnimationFrame(() => startAssemble());
+      }
+      if (i === 2) animateVolume();
+      if (i === 3) playReveal();
+    }
+
+    function animateVolume() {
+      const mega = document.getElementById("volMega");
+      const bars = document.getElementById("segBars");
+      const note = document.getElementById("segNote");
+      const ox = SHARES.find((s) => s.name === "好氧");
+      const oxVol = Math.round(TRAD_V * ox.p);
+      bars.innerHTML = SHARES.map((s) => {
+        const vol = Math.round(TRAD_V * s.p);
+        const hot = s.name === "好氧" ? " is-hot" : "";
+        return `<div class="seg-row${hot}"><span>${s.name}</span>
+          <div class="track"><div class="fill" data-p="${s.p}"></div></div>
+          <span class="n">${vol.toLocaleString()}</span>
+        </div>`;
+      }).join("");
+      if (note) {
+        note.innerHTML = `核心冗余集中在好氧段（<b>${oxVol.toLocaleString()} m³</b>），与左侧理论有效容积 <b>${AI_V.toLocaleString()} m³</b> 对照。`;
+      }
+      const t0 = performance.now();
+      const tick = (t) => {
+        const p = Math.min(1, (t - t0) / 900);
+        const e = 1 - Math.pow(1 - p, 3);
+        mega.textContent = Math.round(TRAD_V * e).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+        else bars.querySelectorAll(".fill").forEach((f) => { f.style.width = (+f.dataset.p * 100) + "%"; });
+      };
+      requestAnimationFrame(tick);
+    }
+
+    function playReveal() {
+      const el = document.getElementById("needVol");
+      const fill = document.getElementById("fillAi");
+      fill.style.width = "0%";
+      const t0 = performance.now();
+      const tick = (t) => {
+        const p = Math.min(1, (t - t0) / 1000);
+        const e = 1 - Math.pow(1 - p, 3);
+        const v = Math.round(TRAD_V + (AI_V - TRAD_V) * e);
+        el.textContent = v.toLocaleString();
+        fill.style.width = (v / TRAD_V * 100) + "%";
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+
+    document.querySelectorAll("[data-go]").forEach((b) => {
+      b.addEventListener("click", () => go(+b.dataset.go));
+    });
+
+    renderProgress();
+    renderTrain();
+    go(0);
+  </script>
+</body>
+</html>
