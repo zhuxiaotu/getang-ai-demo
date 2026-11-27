@@ -226,6 +226,76 @@
       .stage { min-height: 640px; padding: 32px 36px 28px; }
     }
 
+
+
+
+    .topo-svg image.unit-img {
+      /* images sit under titles */
+    }
+    .topo-svg .unit-frame {
+      fill: none;
+      stroke: #0e1c24;
+      stroke-width: 1.8;
+    }
+    .topo-svg .unit-frame.bio {
+      stroke: rgba(13,124,120,.7);
+      stroke-width: 1.8;
+    }
+    /* 三池各自从右往左切：厌氧约 8% 份额少切，缺氧约 38%，好氧约 54% 多切 */
+    .sf-ghost-tank {
+      fill: none; stroke: rgba(13,124,120,.35); stroke-width: 1.4; stroke-dasharray: 5 4; opacity: 0;
+    }
+    .sf-cut-hatch { opacity: 0; pointer-events: none; }
+    .sf-cut-blade { stroke: #b42318; stroke-width: 1.8; stroke-dasharray: 4 3; opacity: 0; }
+    .simple-flow.is-slim .sf-ghost-tank { animation: cutGhost 2.8s ease-in-out infinite; }
+    .simple-flow.is-slim .sf-cut-hatch,
+    .simple-flow.is-slim .sf-cut-blade { animation: cutAway 2.8s ease-in-out infinite; }
+    /* 保留宽度：厌氧 90→72，缺氧 100→62，好氧 120→55（约按 8%/38%/54% 削减强度） */
+    @keyframes cutAnaW {
+      0%, 12% { width: 90px; }
+      38%, 62% { width: 72px; }
+      88%, 100% { width: 90px; }
+    }
+    @keyframes cutAnxW {
+      0%, 12% { width: 100px; }
+      38%, 62% { width: 62px; }
+      88%, 100% { width: 100px; }
+    }
+    @keyframes cutOxW {
+      0%, 12% { width: 120px; }
+      38%, 62% { width: 55px; }
+      88%, 100% { width: 120px; }
+    }
+    .simple-flow.is-slim .sf-clip-ana { animation: cutAnaW 2.8s ease-in-out infinite; }
+    .simple-flow.is-slim .sf-clip-anx { animation: cutAnxW 2.8s ease-in-out infinite; }
+    .simple-flow.is-slim .sf-clip-ox { animation: cutOxW 2.8s ease-in-out infinite; }
+    @keyframes cutGhost {
+      0%, 12% { opacity: 0; }
+      38%, 62% { opacity: 1; }
+      88%, 100% { opacity: 0; }
+    }
+    @keyframes cutAway {
+      0%, 12% { opacity: 0; }
+      38%, 62% { opacity: .95; }
+      88%, 100% { opacity: 0; }
+    }
+    .sf-rin-group { opacity: 0; visibility: hidden; transition: opacity .45s ease; }
+    .simple-flow.is-slim .sf-rin-group { opacity: 1; visibility: visible; }
+    .sf-vol-hi { fill: var(--teal-deep); font-size: 13px; font-weight: 700; font-family: var(--mono); }
+    .sf-vol-lo { fill: #b42318; font-size: 13px; font-weight: 700; font-family: var(--mono); opacity: 0; }
+    .simple-flow.is-slim .sf-vol-hi { animation: volHi 2.8s ease-in-out infinite; }
+    .simple-flow.is-slim .sf-vol-lo { animation: volLo 2.8s ease-in-out infinite; }
+    @keyframes volHi {
+      0%, 12% { opacity: 1; }
+      38%, 62% { opacity: 0; }
+      88%, 100% { opacity: 1; }
+    }
+    @keyframes volLo {
+      0%, 12% { opacity: 0; }
+      38%, 62% { opacity: 1; }
+      88%, 100% { opacity: 0; }
+    }
+
     /* 二维工艺拓扑 */
     .topo-wrap {
       width: 100%;
@@ -299,7 +369,12 @@
       stroke: #1f3340;
       stroke-width: 2;
     }
+    
     .topo-svg .unit-title {
+      paint-order: stroke fill;
+      stroke: rgba(255,255,255,.92);
+      stroke-width: 4px;
+      stroke-linejoin: round;
       fill: var(--ink);
       font-size: 13px;
       font-weight: 700;
@@ -564,43 +639,27 @@
       stroke-width: 2.2;
       animation-duration: 1.1s;
     }
-    /* 池体 + 内回流一体：持续变大变小 */
-    .sf-bio-shrink {
-      transform-box: view-box;
-      transform-origin: 360px 130px;
+    /* 内回流：原设定隐藏，优化后出现（池容切割动画见上方） */
+    .simple-flow.is-slim .sf-topo .pipe-r {
+      stroke-width: 2.6;
+      animation-duration: .85s;
     }
-    @keyframes bioPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(0.86); }
-    }
-    .simple-flow.is-slim .sf-bio-shrink {
-      animation: bioPulse 2.2s ease-in-out infinite;
-    }
-    .sf-cap {
-      margin: 10px 0 0; font-size: 13px; color: var(--muted); line-height: 1.6;
-    }
-    .sf-cap b { color: var(--teal-deep); font-family: var(--mono); }
     .sf-vol-hi, .sf-vol-lo {
-      font-size: 13px;
-      font-weight: 700;
-      font-family: var(--mono);
-      letter-spacing: .02em;
+      font-size: 13px; font-weight: 700; font-family: var(--mono); letter-spacing: .02em;
     }
     .sf-vol-hi { fill: var(--teal-deep); }
     .sf-vol-lo { fill: #b42318; opacity: 0; }
-    .simple-flow.is-slim .sf-vol-hi {
-      animation: volHi 2.2s ease-in-out infinite;
-    }
-    .simple-flow.is-slim .sf-vol-lo {
-      animation: volLo 2.2s ease-in-out infinite;
-    }
+    .simple-flow.is-slim .sf-vol-hi { animation: volHi 2.8s ease-in-out infinite; }
+    .simple-flow.is-slim .sf-vol-lo { animation: volLo 2.8s ease-in-out infinite; }
     @keyframes volHi {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
+      0%, 12% { opacity: 1; }
+      38%, 62% { opacity: 0; }
+      88%, 100% { opacity: 1; }
     }
     @keyframes volLo {
-      0%, 100% { opacity: 0; }
-      50% { opacity: 1; }
+      0%, 12% { opacity: 0; }
+      38%, 62% { opacity: 1; }
+      88%, 100% { opacity: 0; }
     }
 
     /* AI 自动给出缩容结果（无滑块） */
@@ -723,14 +782,14 @@
 
         <div class="flow-board">
           <h3>工艺流程拓扑</h3>
+          
+          
+          
           <div class="topo-wrap">
-            <svg class="topo-svg" id="plantTopo" viewBox="0 0 1100 340" role="img" aria-label="污水处理厂二维工艺拓扑图">
+            <svg class="topo-svg" id="plantTopo" viewBox="0 0 1220 520" role="img" aria-label="葛塘实际工艺拓扑图">
               <defs>
                 <marker id="arrMain" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
                   <path d="M0,0 L6,3 L0,6 Z" fill="#0e1c24"/>
-                </marker>
-                <marker id="arrRin" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                  <path d="M0,0 L6,3 L0,6 Z" fill="#0a6b67"/>
                 </marker>
                 <marker id="arrRout" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
                   <path d="M0,0 L6,3 L0,6 Z" fill="#9a3412"/>
@@ -738,99 +797,113 @@
                 <marker id="arrWas" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
                   <path d="M0,0 L5,2.5 L0,5 Z" fill="#475569"/>
                 </marker>
-                <pattern id="hatchBio" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
-                  <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(13,124,120,.22)" stroke-width="2"/>
-                </pattern>
+                <clipPath id="cScreen"><rect x="70" y="92" width="110" height="100" rx="8"/></clipPath>
+                <clipPath id="cPrimary"><rect x="210" y="96" width="100" height="92" rx="6"/></clipPath>
+                <clipPath id="cAna"><rect x="340" y="100" width="90" height="84" rx="4"/></clipPath>
+                <clipPath id="cAnx"><rect x="440" y="100" width="100" height="84" rx="4"/></clipPath>
+                <clipPath id="cOx"><rect x="550" y="100" width="120" height="84" rx="4"/></clipPath>
+                <clipPath id="cSec"><rect x="720" y="88" width="120" height="108" rx="6"/></clipPath>
+                <clipPath id="cHes"><rect x="720" y="330" width="120" height="90" rx="8"/></clipPath>
+                <clipPath id="cFilter"><rect x="870" y="330" width="120" height="90" rx="8"/></clipPath>
+                <clipPath id="cDis"><rect x="1020" y="330" width="110" height="90" rx="8"/></clipPath>
               </defs>
 
-              <rect class="grid-bg" x="10" y="10" width="1080" height="320" rx="16"/>
+              <rect class="grid-bg" x="10" y="10" width="1200" height="500" rx="16"/>
 
-              <!-- ===== 上层：预处理 + AAO + 二沉 ===== -->
-              <rect class="zone" x="286" y="86" width="360" height="132" rx="12"/>
-              <text class="zone-lab" x="298" y="108">BIO · AAO</text>
-              <text class="zone-lab" x="520" y="108" text-anchor="end" style="font-size:13px">50,000 m³</text>
+              <rect class="zone" x="330" y="70" width="350" height="150" rx="12"/>
+              <text class="zone-lab" x="342" y="92">BIO · AAO</text>
+              <text class="zone-lab" x="666" y="92" text-anchor="end" style="font-size:13px">50,000 m³</text>
 
-              <!-- 主管（箭头缩小） -->
-              <path class="pipe pipe-main" d="M48 160 H88" marker-end="url(#arrMain)"/>
-              <path class="pipe pipe-main" d="M168 160 H198" marker-end="url(#arrMain)"/>
-              <path class="pipe pipe-main" d="M262 160 H286" marker-end="url(#arrMain)"/>
-              <path class="pipe" d="M366 160 H386"/>
-              <path class="pipe" d="M486 160 H506"/>
-              <path class="pipe-flow" d="M48 160 H900"/>
+              <!-- 主管 -->
+              <path class="pipe pipe-main" d="M40 142 H70" marker-end="url(#arrMain)"/>
+              <path class="pipe pipe-main" d="M180 142 H210" marker-end="url(#arrMain)"/>
+              <path class="pipe pipe-main" d="M310 142 H340" marker-end="url(#arrMain)"/>
+              <path class="pipe" d="M430 142 H440"/>
+              <path class="pipe" d="M540 142 H550"/>
+              <path class="pipe pipe-main" d="M670 142 H720" marker-end="url(#arrMain)"/>
+              <path class="pipe-flow" d="M40 142 H780 V375 H1160"/>
 
-              <!-- 内回流 r：好氧 → 缺氧，标百分比 -->
-              <path class="pipe-r" marker-end="url(#arrRin)" d="M560 128 V52 H436 V128"/>
-              <rect class="elbow rin" x="556" y="124" width="6" height="6"/>
-              <rect class="elbow rin" x="556" y="49" width="6" height="6"/>
-              <rect class="elbow rin" x="433" y="49" width="6" height="6"/>
-              <rect class="elbow rin" x="433" y="124" width="6" height="6"/>
-              <rect x="450" y="28" width="100" height="22" rx="5" fill="#fff" stroke="#0a6b67" stroke-width="1.4"/>
-              <text class="rec-lab" x="500" y="44" text-anchor="middle" fill="#0a6b67">r 内回流 300%</text>
+              <!-- 外回流 -->
+              <path class="pipe-R" marker-end="url(#arrRout)" d="M760 210 V270 H385 V184"/>
+              <rect class="elbow rout" x="757" y="207" width="6" height="6"/>
+              <rect class="elbow rout" x="757" y="267" width="6" height="6"/>
+              <rect class="elbow rout" x="382" y="267" width="6" height="6"/>
+              <rect class="elbow rout" x="382" y="181" width="6" height="6"/>
+              <rect x="500" y="278" width="100" height="22" rx="5" fill="#fff" stroke="#9a3412" stroke-width="1.4"/>
+              <text class="rec-lab" x="550" y="294" text-anchor="middle" fill="#9a3412">R 外回流 70%</text>
 
-              <!-- 外回流 R：二沉 → 厌氧，标百分比 -->
-              <path class="pipe-R" marker-end="url(#arrRout)" d="M760 204 V268 H318 V204"/>
-              <rect class="elbow rout" x="757" y="201" width="6" height="6"/>
-              <rect class="elbow rout" x="757" y="265" width="6" height="6"/>
-              <rect class="elbow rout" x="315" y="265" width="6" height="6"/>
-              <rect class="elbow rout" x="315" y="201" width="6" height="6"/>
-              <rect x="480" y="278" width="100" height="22" rx="5" fill="#fff" stroke="#9a3412" stroke-width="1.4"/>
-              <text class="rec-lab" x="530" y="294" text-anchor="middle" fill="#9a3412">R 外回流 70%</text>
+              <path class="pipe-was" marker-end="url(#arrWas)" d="M840 150 H920"/>
+              <text class="unit-sub" x="930" y="154" text-anchor="start">剩余污泥</text>
 
-              <!-- 剩余污泥 -->
-              <path class="pipe-was" marker-end="url(#arrWas)" d="M780 188 V236 H830"/>
-              <text class="unit-sub" x="840" y="240" text-anchor="start">剩余污泥</text>
+              <text class="io-lab" x="28" y="136">进水</text>
+              <text class="unit-sub" x="28" y="154">Q</text>
 
-              <text class="io-lab" x="36" y="156">进水</text>
-              <text class="unit-sub" x="36" y="174">Q</text>
-
-              <!-- 格栅 -->
-              <rect class="unit" x="88" y="130" width="80" height="60" rx="6"/>
-              <rect x="84" y="154" width="6" height="12" fill="#0e1c24"/>
-              <rect x="166" y="154" width="6" height="12" fill="#0e1c24"/>
-              <text class="unit-title" x="128" y="158">格栅</text>
-              <text class="unit-sub" x="128" y="176">预处理</text>
+              <!-- 格栅：更大方框，字在图下 -->
+              <image href="./img/unit_screen.jpg" x="70" y="92" width="110" height="100" preserveAspectRatio="xMidYMid slice" clip-path="url(#cScreen)"/>
+              <rect class="unit-frame" x="70" y="92" width="110" height="100" rx="8"/>
+              <text class="unit-title" x="125" y="212">格栅</text>
+              <text class="unit-sub" x="125" y="228">预处理</text>
 
               <!-- 初沉 -->
-              <circle class="unit clarify" cx="230" cy="160" r="32"/>
-              <rect x="196" y="154" width="6" height="12" fill="#0e1c24"/>
-              <rect x="258" y="154" width="6" height="12" fill="#0e1c24"/>
-              <text class="unit-title" x="230" y="156">初沉</text>
-              <text class="unit-sub" x="230" y="174">沉淀</text>
+              <image href="./img/unit_primary.jpg" x="210" y="96" width="100" height="92" preserveAspectRatio="xMidYMid slice" clip-path="url(#cPrimary)"/>
+              <rect class="unit-frame" x="210" y="96" width="100" height="92" rx="6"/>
+              <text class="unit-title" x="260" y="212">初沉</text>
+              <text class="unit-sub" x="260" y="228">沉淀</text>
 
-              <!-- AAO 三段：厌氧 / 缺氧 / 好氧 -->
-              <rect class="unit bio" x="286" y="128" width="80" height="64" rx="4"/>
-              <rect x="286" y="160" width="80" height="32" fill="url(#hatchBio)"/>
-              <text class="unit-title bio-title" x="326" y="154">厌氧</text>
-              <text class="unit-sub" x="326" y="176">Ana</text>
+              <!-- AAO -->
+              <image href="./img/unit_anaerobic.jpg" x="340" y="100" width="90" height="84" preserveAspectRatio="xMidYMid slice" clip-path="url(#cAna)"/>
+              <rect class="unit-frame bio" x="340" y="100" width="90" height="84" rx="4"/>
+              <text class="unit-title bio-title" x="385" y="212">厌氧</text>
+              <text class="unit-sub" x="385" y="228">Ana</text>
 
-              <rect class="unit bio" x="386" y="128" width="100" height="64" rx="4"/>
-              <rect x="386" y="160" width="100" height="32" fill="url(#hatchBio)"/>
-              <text class="unit-title bio-title" x="436" y="154">缺氧</text>
-              <text class="unit-sub" x="436" y="176">Anx</text>
+              <image href="./img/unit_anoxic.jpg" x="440" y="100" width="100" height="84" preserveAspectRatio="xMidYMid slice" clip-path="url(#cAnx)"/>
+              <rect class="unit-frame bio" x="440" y="100" width="100" height="84" rx="4"/>
+              <text class="unit-title bio-title" x="490" y="212">缺氧</text>
+              <text class="unit-sub" x="490" y="228">Anx</text>
 
-              <rect class="unit bio" x="506" y="128" width="120" height="64" rx="4"/>
-              <rect x="506" y="160" width="120" height="32" fill="url(#hatchBio)"/>
-              <text class="unit-title bio-title" x="566" y="154">好氧</text>
-              <text class="unit-sub" x="566" y="176">Ox</text>
+              <image href="./img/unit_aerobic.jpg" x="550" y="100" width="120" height="84" preserveAspectRatio="xMidYMid slice" clip-path="url(#cOx)"/>
+              <rect class="unit-frame bio" x="550" y="100" width="120" height="84" rx="4"/>
+              <text class="unit-title bio-title" x="610" y="212">好氧</text>
+              <text class="unit-sub" x="610" y="228">Ox</text>
 
-              <path class="pipe pipe-main" d="M626 160 H720" marker-end="url(#arrMain)"/>
+              <!-- 二沉：更大方框 -->
+              <image href="./img/unit_secondary.jpg" x="720" y="88" width="120" height="108" preserveAspectRatio="xMidYMid slice" clip-path="url(#cSec)"/>
+              <rect class="unit-frame" x="720" y="88" width="120" height="108" rx="6"/>
+              <text class="unit-title" x="780" y="218">二沉</text>
+              <text class="unit-sub" x="780" y="234">固液分离</text>
 
-              <circle class="unit clarify" cx="760" cy="160" r="40"/>
-              <rect x="718" y="154" width="6" height="12" fill="#0e1c24"/>
-              <rect x="796" y="154" width="6" height="12" fill="#0e1c24"/>
-              <text class="unit-title" x="760" y="156">二沉</text>
-              <text class="unit-sub" x="760" y="174">固液分离</text>
+              <!-- 二沉 ↓ 深度处理 -->
+              <path class="pipe pipe-main" d="M780 196 V330" marker-end="url(#arrMain)"/>
+              <rect class="elbow" x="777" y="193" width="6" height="6"/>
+              <text class="zone-lab" x="720" y="322" fill="#5d7380">深度处理</text>
 
-              <!-- 二沉后直接出水 -->
-              <path class="pipe pipe-main" d="M800 160 H900" marker-end="url(#arrMain)"/>
-              <path class="pipe-flow" d="M800 160 H900"/>
-              <text class="io-lab" x="920" y="156">出水</text>
-              <text class="unit-sub" x="920" y="174">一级 A</text>
+              <image href="./img/unit_hes.jpg" x="720" y="330" width="120" height="90" preserveAspectRatio="xMidYMid slice" clip-path="url(#cHes)"/>
+              <rect class="unit-frame" x="720" y="330" width="120" height="90" rx="8"/>
+              <text class="unit-title" x="780" y="440">高效沉淀</text>
+              <text class="unit-sub" x="780" y="456">深度除磷</text>
+              <path class="pipe pipe-main" d="M840 375 H870" marker-end="url(#arrMain)"/>
+
+              <image href="./img/unit_filter.jpg" x="870" y="330" width="120" height="90" preserveAspectRatio="xMidYMid slice" clip-path="url(#cFilter)"/>
+              <rect class="unit-frame" x="870" y="330" width="120" height="90" rx="8"/>
+              <text class="unit-title" x="930" y="440">反硝化深床</text>
+              <text class="unit-sub" x="930" y="456">滤池</text>
+              <path class="pipe pipe-main" d="M990 375 H1020" marker-end="url(#arrMain)"/>
+
+              <image href="./img/unit_disinfect.jpg" x="1020" y="330" width="110" height="90" preserveAspectRatio="xMidYMid slice" clip-path="url(#cDis)"/>
+              <rect class="unit-frame" x="1020" y="330" width="110" height="90" rx="8"/>
+              <text class="unit-title" x="1075" y="440">次氯酸钠</text>
+              <text class="unit-sub" x="1075" y="456">消毒池</text>
+              <path class="pipe pipe-main" d="M1130 375 H1160" marker-end="url(#arrMain)"/>
+
+              <text class="io-lab" x="1175" y="368">出水</text>
+              <text class="unit-sub" x="1175" y="386">一级 A</text>
             </svg>
           </div>
+
+
+
           <div class="topo-legend">
             <span class="main"><i></i>主流向</span>
-            <span class="rin"><i></i>内回流 r = 300%（好氧→缺氧）</span>
             <span class="rout"><i></i>外回流 R = 70%（二沉→厌氧）</span>
             <span class="was"><i></i>剩余污泥</span>
           </div>
@@ -972,11 +1045,14 @@
         <h2 class="title">AI 调试对比：池容缩减与 <em>参数重配</em></h2>
         <div class="simple-flow" id="simpleFlow">
           <div class="sf-head">
-            <h3>AAO 工艺示意 · 参数调试</h3>
+            <h3>葛塘全流程 · 参数调试</h3>
             <div class="sf-badge" id="sfBadge">原设定</div>
           </div>
+          
+          
+          
           <div class="topo-wrap">
-            <svg class="topo-svg sf-topo" id="sfTopo" viewBox="0 0 1000 360" role="img" aria-label="AAO工艺示意">
+            <svg class="topo-svg sf-topo" id="sfTopo" viewBox="0 0 1220 520" role="img" aria-label="葛塘工艺调试示意">
               <defs>
                 <marker id="sfArrMain" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
                   <path d="M0,0 L6,3 L0,6 Z" fill="#0e1c24"/>
@@ -987,86 +1063,136 @@
                 <marker id="sfArrRR" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
                   <path d="M0,0 L6,3 L0,6 Z" fill="#9a3412"/>
                 </marker>
-                <pattern id="hatchBio2" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
-                  <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(13,124,120,.22)" stroke-width="2"/>
+                <pattern id="cutHatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
+                  <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(180,35,24,.35)" stroke-width="2"/>
                 </pattern>
+                <!-- 各池从左保留、右侧切掉；宽度动画按份额不同 -->
+                <clipPath id="sfClipAna"><rect class="sf-clip-ana" x="340" y="100" width="90" height="84" rx="4"/></clipPath>
+                <clipPath id="sfClipAnx"><rect class="sf-clip-anx" x="440" y="100" width="100" height="84" rx="4"/></clipPath>
+                <clipPath id="sfClipOx"><rect class="sf-clip-ox" x="550" y="100" width="120" height="84" rx="4"/></clipPath>
+                <clipPath id="sfCScreen"><rect x="70" y="92" width="110" height="100" rx="8"/></clipPath>
+                <clipPath id="sfCPrimary"><rect x="210" y="96" width="100" height="92" rx="6"/></clipPath>
+                <clipPath id="sfCSec"><rect x="720" y="88" width="120" height="108" rx="6"/></clipPath>
+                <clipPath id="sfCHes"><rect x="720" y="330" width="120" height="90" rx="8"/></clipPath>
+                <clipPath id="sfCFilter"><rect x="870" y="330" width="120" height="90" rx="8"/></clipPath>
+                <clipPath id="sfCDis"><rect x="1020" y="330" width="110" height="90" rx="8"/></clipPath>
               </defs>
 
-              <rect class="grid-bg" x="10" y="10" width="980" height="340" rx="14"/>
+              <rect class="grid-bg" x="10" y="10" width="1200" height="500" rx="14"/>
 
-              <!-- AAO 池体 + 内回流一体，优化后持续脉动 -->
-              <g class="sf-bio-shrink" id="sfBioGroup">
-                <rect class="zone" x="180" y="90" width="360" height="132" rx="12"/>
-                <text class="zone-lab" x="192" y="112">BIO · AAO</text>
-                <!-- 池容放在虚线框右侧外，彻底躲开内回流 -->
-                <text class="sf-vol-hi" id="sfVolHi" x="552" y="112" text-anchor="start">50,000 m³</text>
-                <text class="sf-vol-lo" id="sfVolLo" x="552" y="112" text-anchor="start">30,000 m³</text>
+              <rect class="zone" x="330" y="70" width="350" height="150" rx="12"/>
+              <text class="zone-lab" x="342" y="92">BIO · AAO</text>
+              <text class="sf-vol-hi" id="sfVolHi" x="666" y="92" text-anchor="end">50,000 m³</text>
+              <text class="sf-vol-lo" id="sfVolLo" x="666" y="92" text-anchor="end">30,000 m³</text>
 
-                <rect class="unit bio" x="180" y="132" width="80" height="64" rx="4"/>
-                <rect x="180" y="164" width="80" height="32" fill="url(#hatchBio2)"/>
-                <text class="unit-title bio-title" x="220" y="158">厌氧</text>
-                <text class="unit-sub" id="sfAna" x="220" y="180">—</text>
+              <rect class="sf-ghost-tank" x="340" y="100" width="90" height="84" rx="4"/>
+              <rect class="sf-ghost-tank" x="440" y="100" width="100" height="84" rx="4"/>
+              <rect class="sf-ghost-tank" x="550" y="100" width="120" height="84" rx="4"/>
 
-                <rect class="unit bio" x="280" y="132" width="100" height="64" rx="4"/>
-                <rect x="280" y="164" width="100" height="32" fill="url(#hatchBio2)"/>
-                <text class="unit-title bio-title" x="330" y="158">缺氧</text>
-                <text class="unit-sub" id="sfAnx" x="330" y="180">—</text>
+              <path class="pipe pipe-main" d="M40 142 H70" marker-end="url(#sfArrMain)"/>
+              <path class="pipe pipe-main" d="M180 142 H210" marker-end="url(#sfArrMain)"/>
+              <path class="pipe pipe-main" d="M310 142 H340" marker-end="url(#sfArrMain)"/>
+              <path class="pipe" d="M430 142 H440"/>
+              <path class="pipe" d="M540 142 H550"/>
+              <path class="pipe pipe-main" d="M670 142 H720" marker-end="url(#sfArrMain)"/>
+              <path class="pipe-flow" d="M40 142 H780 V375 H1160"/>
 
-                <rect class="unit bio" x="400" y="132" width="120" height="64" rx="4"/>
-                <rect x="400" y="164" width="120" height="32" fill="url(#hatchBio2)"/>
-                <text class="unit-title bio-title" x="460" y="158">好氧</text>
-                <text class="unit-sub" id="sfOx" x="460" y="180">—</text>
+              <text class="io-lab" x="28" y="136">进水</text>
+              <text class="unit-sub" x="28" y="154">Q</text>
 
-                <!-- 内回流：上翻到框外，下落点在缺氧左缘，避开池容字 -->
-                <path class="pipe-r" marker-end="url(#sfArrR)" d="M505 132 V36 H290 V132"/>
-                <rect class="elbow rin" x="502" y="129" width="6" height="6"/>
-                <rect class="elbow rin" x="502" y="33" width="6" height="6"/>
-                <rect class="elbow rin" x="287" y="33" width="6" height="6"/>
-                <rect class="elbow rin" x="287" y="129" width="6" height="6"/>
-                <rect x="350" y="14" width="120" height="22" rx="5" fill="#fff" stroke="#0a6b67" stroke-width="1.4"/>
-                <text class="rec-lab" id="sfLabRin" x="410" y="30" text-anchor="middle" fill="#0a6b67">r 内回流 300%</text>
+              <image href="./img/unit_screen.jpg" x="70" y="92" width="110" height="100" preserveAspectRatio="xMidYMid slice" clip-path="url(#sfCScreen)"/>
+              <rect class="unit-frame" x="70" y="92" width="110" height="100" rx="8"/>
+              <text class="unit-title" x="125" y="212">格栅</text>
+              <text class="unit-sub" x="125" y="228">预处理</text>
+
+              <image href="./img/unit_primary.jpg" x="210" y="96" width="100" height="92" preserveAspectRatio="xMidYMid slice" clip-path="url(#sfCPrimary)"/>
+              <rect class="unit-frame" x="210" y="96" width="100" height="92" rx="6"/>
+              <text class="unit-title" x="260" y="212">初沉</text>
+              <text class="unit-sub" x="260" y="228">沉淀</text>
+
+              <!-- 厌氧：份额小，右侧少切 -->
+              <image href="./img/unit_anaerobic.jpg" x="340" y="100" width="90" height="84" preserveAspectRatio="xMidYMid slice" clip-path="url(#sfClipAna)"/>
+              <rect class="unit-frame bio" x="340" y="100" width="90" height="84" rx="4"/>
+              <rect class="sf-cut-hatch" x="412" y="100" width="18" height="84" fill="url(#cutHatch)"/>
+              <line class="sf-cut-blade" x1="412" y1="100" x2="412" y2="184"/>
+
+              <!-- 缺氧：中等 -->
+              <image href="./img/unit_anoxic.jpg" x="440" y="100" width="100" height="84" preserveAspectRatio="xMidYMid slice" clip-path="url(#sfClipAnx)"/>
+              <rect class="unit-frame bio" x="440" y="100" width="100" height="84" rx="4"/>
+              <rect class="sf-cut-hatch" x="502" y="100" width="38" height="84" fill="url(#cutHatch)"/>
+              <line class="sf-cut-blade" x1="502" y1="100" x2="502" y2="184"/>
+
+              <!-- 好氧：份额大，右侧多切 -->
+              <image href="./img/unit_aerobic.jpg" x="550" y="100" width="120" height="84" preserveAspectRatio="xMidYMid slice" clip-path="url(#sfClipOx)"/>
+              <rect class="unit-frame bio" x="550" y="100" width="120" height="84" rx="4"/>
+              <rect class="sf-cut-hatch" x="605" y="100" width="65" height="84" fill="url(#cutHatch)"/>
+              <line class="sf-cut-blade" x1="605" y1="100" x2="605" y2="184"/>
+
+              <text class="unit-title bio-title" x="385" y="212">厌氧</text>
+              <text class="unit-sub" id="sfAna" x="385" y="228">—</text>
+              <text class="unit-title bio-title" x="490" y="212">缺氧</text>
+              <text class="unit-sub" id="sfAnx" x="490" y="228">—</text>
+              <text class="unit-title bio-title" x="610" y="212">好氧</text>
+              <text class="unit-sub" id="sfOx" x="610" y="228">—</text>
+
+              <g class="sf-rin-group" id="sfRinGroup">
+                <path class="pipe-r" marker-end="url(#sfArrR)" d="M610 100 V48 H490 V100"/>
+                <rect class="elbow rin" x="607" y="97" width="6" height="6"/>
+                <rect class="elbow rin" x="607" y="45" width="6" height="6"/>
+                <rect class="elbow rin" x="487" y="45" width="6" height="6"/>
+                <rect class="elbow rin" x="487" y="97" width="6" height="6"/>
+                <rect x="500" y="24" width="100" height="22" rx="5" fill="#fff" stroke="#0a6b67" stroke-width="1.4"/>
+                <text class="rec-lab" id="sfLabRin" x="550" y="40" text-anchor="middle" fill="#0a6b67">r 内回流 200%</text>
               </g>
 
-              <!-- 主流 -->
-              <path class="pipe pipe-main" d="M48 164 H100" marker-end="url(#sfArrMain)"/>
-              <path class="pipe pipe-main" d="M100 164 H180" marker-end="url(#sfArrMain)"/>
-              <path class="pipe pipe-main" d="M260 164 H280"/>
-              <path class="pipe pipe-main" d="M380 164 H400"/>
-              <path class="pipe pipe-main" d="M520 164 H620" marker-end="url(#sfArrMain)"/>
-              <path class="pipe pipe-main" d="M700 164 H780" marker-end="url(#sfArrMain)"/>
-              <path class="pipe-flow" d="M48 164 H780"/>
+              <image href="./img/unit_secondary.jpg" x="720" y="88" width="120" height="108" preserveAspectRatio="xMidYMid slice" clip-path="url(#sfCSec)"/>
+              <rect class="unit-frame" x="720" y="88" width="120" height="108" rx="6"/>
+              <text class="unit-title" x="780" y="218">二沉</text>
+              <text class="unit-sub" x="780" y="234">固液分离</text>
 
-              <text class="io-lab" x="40" y="150">进水</text>
-              <text class="unit-sub" x="40" y="180">Q</text>
+              <path class="pipe-R" marker-end="url(#sfArrRR)" d="M760 210 V270 H385 V184"/>
+              <rect class="elbow rout" x="757" y="207" width="6" height="6"/>
+              <rect class="elbow rout" x="757" y="267" width="6" height="6"/>
+              <rect class="elbow rout" x="382" y="267" width="6" height="6"/>
+              <rect class="elbow rout" x="382" y="181" width="6" height="6"/>
+              <rect x="500" y="278" width="100" height="22" rx="5" fill="#fff" stroke="#9a3412" stroke-width="1.4"/>
+              <text class="rec-lab" id="sfLabRout" x="550" y="294" text-anchor="middle" fill="#9a3412">R 外回流 70%</text>
 
-              <rect class="unit" x="100" y="134" width="60" height="60" rx="6"/>
-              <text class="unit-title" x="130" y="162">格栅</text>
-              <text class="unit-sub" x="130" y="178">预处理</text>
+              <path class="pipe-was" d="M840 150 H920"/>
+              <text class="unit-sub" x="930" y="154" text-anchor="start">剩余污泥</text>
 
-              <circle class="unit clarify" cx="660" cy="164" r="40"/>
-              <text class="unit-title" x="660" y="160">二沉</text>
-              <text class="unit-sub" x="660" y="178">固液分离</text>
+              <path class="pipe pipe-main" d="M780 196 V330" marker-end="url(#sfArrMain)"/>
+              <text class="zone-lab" x="720" y="322" fill="#5d7380">深度处理</text>
 
-              <text class="io-lab" x="820" y="160">出水</text>
-              <text class="unit-sub" x="820" y="178">一级A</text>
+              <image href="./img/unit_hes.jpg" x="720" y="330" width="120" height="90" preserveAspectRatio="xMidYMid slice" clip-path="url(#sfCHes)"/>
+              <rect class="unit-frame" x="720" y="330" width="120" height="90" rx="8"/>
+              <text class="unit-title" x="780" y="440">高效沉淀</text>
+              <text class="unit-sub" x="780" y="456">深度除磷</text>
+              <path class="pipe pipe-main" d="M840 375 H870" marker-end="url(#sfArrMain)"/>
 
-              <!-- 外回流（二沉侧） -->
-              <path class="pipe-R" marker-end="url(#sfArrRR)" d="M660 204 V280 H220 V196"/>
-              <rect class="elbow rout" x="657" y="201" width="6" height="6"/>
-              <rect class="elbow rout" x="657" y="277" width="6" height="6"/>
-              <rect class="elbow rout" x="217" y="277" width="6" height="6"/>
-              <rect class="elbow rout" x="217" y="193" width="6" height="6"/>
-              <rect x="370" y="292" width="120" height="22" rx="5" fill="#fff" stroke="#9a3412" stroke-width="1.4"/>
-              <text class="rec-lab" id="sfLabRout" x="430" y="308" text-anchor="middle" fill="#9a3412">R 外回流 70%</text>
+              <image href="./img/unit_filter.jpg" x="870" y="330" width="120" height="90" preserveAspectRatio="xMidYMid slice" clip-path="url(#sfCFilter)"/>
+              <rect class="unit-frame" x="870" y="330" width="120" height="90" rx="8"/>
+              <text class="unit-title" x="930" y="440">反硝化深床</text>
+              <text class="unit-sub" x="930" y="456">滤池</text>
+              <path class="pipe pipe-main" d="M990 375 H1020" marker-end="url(#sfArrMain)"/>
 
-              <path class="pipe-was" d="M690 190 V240 H760"/>
-              <text class="unit-sub" x="770" y="244" text-anchor="start">剩余污泥</text>
+              <image href="./img/unit_disinfect.jpg" x="1020" y="330" width="110" height="90" preserveAspectRatio="xMidYMid slice" clip-path="url(#sfCDis)"/>
+              <rect class="unit-frame" x="1020" y="330" width="110" height="90" rx="8"/>
+              <text class="unit-title" x="1075" y="440">次氯酸钠</text>
+              <text class="unit-sub" x="1075" y="456">消毒池</text>
+              <path class="pipe pipe-main" d="M1130 375 H1160" marker-end="url(#sfArrMain)"/>
 
-              <text class="unit-sub" id="sfHrtLab" x="180" y="240" text-anchor="start">HRT ≈ 20 h · SRT 14 d</text>
+              <text class="io-lab" x="1175" y="368">出水</text>
+              <text class="unit-sub" x="1175" y="386">一级 A</text>
+
+              <text class="unit-sub" id="sfHrtLab" x="340" y="250" text-anchor="start">HRT ≈ 20 h · SRT 14 d</text>
             </svg>
           </div>
+
+
+
           <div class="topo-legend">
-            <span class="rin"><i></i>内回流 r（好氧→缺氧）</span>
+            <span class="rin"><i></i>内回流：优化后增设</span>
             <span class="rout"><i></i>外回流 R（二沉→厌氧）</span>
             <span class="was"><i></i>剩余污泥</span>
           </div>
@@ -1106,15 +1232,15 @@
               <tbody>
                 <tr>
                   <td>内回流比 (r)</td>
-                  <td class="mono">300%</td>
+                  <td class="mono">无</td>
                   <td class="mono">200%</td>
-                  <td>适当降内回流，减回流泵耗</td>
+                  <td>增设内回流，强化反硝化</td>
                 </tr>
                 <tr>
                   <td>外回流比 (R)</td>
                   <td class="mono">70%</td>
                   <td class="mono">30%</td>
-                  <td>外回流再降，稳住厌氧除磷</td>
+                  <td>外回流下调，稳住厌氧除磷</td>
                 </tr>
                 <tr>
                   <td>水力停留时间 (HRT)</td>
@@ -1147,8 +1273,8 @@
           </div>
           <div class="final-card">
             <div class="n">回流</div>
-            <div class="c">内外回流重配</div>
-            <div class="d">r 300%→200%，R 70%→30%，泵耗下降</div>
+            <div class="c">增设内回流 · 外回流下调</div>
+            <div class="d">r 无→200%，R 70%→30%</div>
           </div>
           <div class="final-card">
             <div class="n">一级A</div>
@@ -1527,17 +1653,17 @@
       if (!box) return;
       box.classList.remove("is-slim");
       setSimpleTankLabels(TRAD_V);
-      if (badge) badge.textContent = "原设定";
-      if (labRin) labRin.textContent = "r 内回流 300%";
+      if (badge) badge.textContent = "原设定 · 无内回流";
+      if (labRin) labRin.textContent = "r 内回流 200%";
       if (labRout) labRout.textContent = "R 外回流 70%";
-      if (hrtLab) hrtLab.textContent = "HRT ≈ 20 h · SRT 14 d";
+      if (hrtLab) hrtLab.textContent = "HRT ≈ 20 h · SRT 14 d · 无内回流";
       setTimeout(() => {
         box.classList.add("is-slim");
         setSimpleTankLabels(AI_V);
         if (badge) badge.textContent = "AI 优化后";
         if (labRin) labRin.textContent = "r 内回流 200%";
         if (labRout) labRout.textContent = "R 外回流 30%";
-        if (hrtLab) hrtLab.textContent = "HRT ≈ 12 h · SRT 20 d";
+        if (hrtLab) hrtLab.textContent = "HRT ≈ 12 h · SRT 20 d · 内回流 200%";
       }, 700);
     }
 
