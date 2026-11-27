@@ -403,9 +403,135 @@
       background: rgba(14,28,36,.9); color: #b7f0e4; line-height: 1.7;
     }
 
+    /* 简易工艺图：内外回流 + 缩池动画 */
+    .simple-flow {
+      margin-top: 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(13,124,120,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(236,246,244,.92));
+      padding: 16px 18px 14px;
+    }
+    .sf-head {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px;
+    }
+    .sf-head h3 { margin: 0; font-size: 13px; font-weight: 700; color: var(--teal-deep); }
+    .sf-badge {
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      padding: 5px 10px; border-radius: 999px;
+      background: rgba(14,28,36,.08); color: var(--muted);
+      transition: .4s ease;
+    }
+    .simple-flow.is-slim .sf-badge {
+      background: rgba(31,157,114,.16); color: var(--teal-deep);
+    }
+    .sf-board {
+      position: relative;
+      padding: 22px 4px 28px;
+      min-height: 190px;
+    }
+    .sf-arrows text { font-weight: 700; }
+    .sf-row {
+      display: grid;
+      grid-template-columns: 48px repeat(4, minmax(0, 1fr)) 48px;
+      gap: 8px;
+      align-items: end;
+    }
+    .sf-io {
+      text-align: center; font-size: 12px; font-weight: 700; color: var(--muted);
+      padding-bottom: 18px;
+    }
+    .sf-tank {
+      position: relative;
+      border-radius: 14px 14px 10px 10px;
+      border: 1px solid rgba(13,124,120,.28);
+      background: linear-gradient(180deg, #e7f7f4, #fff);
+      height: 118px;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      align-items: center;
+      padding: 8px 4px;
+      transition: height .9s cubic-bezier(.2,.8,.2,1), background .4s ease, border-color .4s ease;
+      box-shadow: 0 10px 22px rgba(14,28,36,.06);
+      overflow: hidden;
+    }
+    .sf-tank::before {
+      content: "";
+      position: absolute; left: 0; right: 0; bottom: 0;
+      height: 42%;
+      background: linear-gradient(180deg, rgba(13,124,120,.18), rgba(13,124,120,.34));
+      transition: height .9s cubic-bezier(.2,.8,.2,1);
+    }
+    .sf-tank b {
+      position: relative; z-index: 1;
+      font-size: clamp(12px, 1.2vw, 14px); font-weight: 700; color: var(--ink);
+    }
+    .sf-tank i {
+      position: relative; z-index: 1;
+      margin-top: 4px; font-style: normal; font-family: var(--mono);
+      font-size: 11px; color: var(--teal-deep); font-weight: 700;
+    }
+    .simple-flow.is-slim .sf-tank {
+      height: 58px;
+      border-color: rgba(31,157,114,.4);
+      background: linear-gradient(180deg, #dff7ee, #fff);
+    }
+    .simple-flow.is-slim .sf-tank::before { height: 55%; }
+    .sf-arrows {
+      position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+      width: 100%; height: 100%; pointer-events: none; overflow: visible;
+    }
+    .sf-arrows path {
+      fill: none; stroke-width: 2.2; stroke-linecap: round;
+    }
+    .sf-arrows .r-in {
+      stroke: #0d7c78;
+      stroke-dasharray: 6 5;
+      animation: dashFlow 1.1s linear infinite;
+    }
+    .sf-arrows .r-out {
+      stroke: #9a3412;
+      stroke-dasharray: 7 5;
+      animation: dashFlow 1.4s linear infinite;
+    }
+    .simple-flow.is-slim .sf-arrows .r-in { stroke-width: 3; animation-duration: .75s; }
+    .simple-flow.is-slim .sf-arrows .r-out { stroke-width: 2.6; }
+    @keyframes dashFlow {
+      to { stroke-dashoffset: -22; }
+    }
+    .sf-legend {
+      margin-top: 6px; display: flex; flex-wrap: wrap; gap: 14px;
+      font-size: 12px; color: var(--muted);
+    }
+    .sf-legend span::before {
+      content: ""; display: inline-block; width: 18px; height: 3px;
+      margin-right: 6px; vertical-align: middle; border-radius: 2px;
+    }
+    .sf-legend .in::before { background: #0d7c78; }
+    .sf-legend .out::before { background: #9a3412; }
+    .sf-foot {
+      margin-top: 12px;
+      display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;
+    }
+    .sf-space {
+      height: 16px; border-radius: 999px; background: rgba(14,28,36,.08); overflow: hidden;
+      position: relative;
+    }
+    .sf-space .bar {
+      height: 100%; width: 100%; border-radius: inherit;
+      background: linear-gradient(90deg, #13454a, #0d7c78);
+      transition: width .9s cubic-bezier(.2,.8,.2,1);
+    }
+    .simple-flow.is-slim .sf-space .bar { width: 50%; background: linear-gradient(90deg, #0d7c78, #1f9d72); }
+    .sf-space-label {
+      font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--teal-deep); white-space: nowrap;
+    }
+    .sf-cap {
+      margin: 10px 0 0; font-size: 13px; color: var(--muted); line-height: 1.6;
+    }
+    .sf-cap b { color: var(--teal-deep); font-family: var(--mono); }
+
     /* AI 自动给出缩容结果（无滑块） */
     .reveal {
-      margin-top: 20px;
+      margin-top: 16px;
       display: grid;
       grid-template-columns: 1.1fr .9fr;
       gap: 14px;
@@ -500,6 +626,10 @@
       .vol-hero, .reveal, .final-grid, .wq-pair { grid-template-columns: 1fr; }
       .top { flex-direction: column; align-items: flex-start; }
       .train-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .sf-row { grid-template-columns: 36px repeat(4, minmax(0, 1fr)) 36px; gap: 4px; }
+      .sf-tank { height: 96px; }
+      .simple-flow.is-slim .sf-tank { height: 48px; }
+      .sf-io { font-size: 11px; padding-bottom: 12px; }
     }
     @media (max-width: 640px) {
       .train-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -659,7 +789,49 @@
       <section class="act" data-i="3">
         <p class="eyebrow">Step 04 · 调试对比</p>
         <h2 class="title">AI 调试对比：池容缩减与 <em>参数重配</em></h2>
-        <p class="lead">保持进水条件与一级 A 达标约束，AI 重配工艺参数，释放冗余池容。</p>
+        <p class="lead">保持进水条件与一级 A 达标约束，AI 强化内外回流并重配参数，释放冗余池容。</p>
+
+        <div class="simple-flow" id="simpleFlow">
+          <div class="sf-head">
+            <h3>简易工艺示意 · 内外回流</h3>
+            <div class="sf-badge" id="sfBadge">传统池容</div>
+          </div>
+          <div class="sf-board">
+            <div class="sf-row" id="sfRow">
+              <span class="sf-io">进水</span>
+              <div class="sf-tank" data-tank="ana"><b>厌氧</b><i id="sfAna">—</i></div>
+              <div class="sf-tank" data-tank="anx"><b>缺氧</b><i id="sfAnx">—</i></div>
+              <div class="sf-tank" data-tank="ox"><b>好氧</b><i id="sfOx">—</i></div>
+              <div class="sf-tank" data-tank="sec"><b>二沉</b><i>沉淀</i></div>
+              <span class="sf-io">出水</span>
+            </div>
+            <svg class="sf-arrows" id="sfArrows" viewBox="0 0 1000 190" preserveAspectRatio="none" aria-hidden="true">
+              <!-- 内回流：好氧 → 缺氧（上方） -->
+              <path class="r-in" d="M 585 42 C 560 6, 470 6, 445 48" marker-end="url(#arrIn)" />
+              <text x="505" y="14" text-anchor="middle" fill="#0d7c78" font-size="18" font-family="Menlo,monospace">r 内回流</text>
+              <!-- 外回流：二沉 → 厌氧（下方） -->
+              <path class="r-out" d="M 780 148 C 700 188, 320 188, 250 132" marker-end="url(#arrOut)" />
+              <text x="515" y="182" text-anchor="middle" fill="#9a3412" font-size="18" font-family="Menlo,monospace">R 外回流</text>
+              <defs>
+                <marker id="arrIn" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#0d7c78" />
+                </marker>
+                <marker id="arrOut" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#9a3412" />
+                </marker>
+              </defs>
+            </svg>
+          </div>
+          <div class="sf-legend">
+            <span class="in">内回流 r（好氧 → 缺氧）</span>
+            <span class="out">外回流 R（二沉 → 厌氧）</span>
+          </div>
+          <div class="sf-foot">
+            <div class="sf-space"><div class="bar" id="sfSpaceBar"></div></div>
+            <div class="sf-space-label" id="sfSpaceLabel">占地 100%</div>
+          </div>
+          <p class="sf-cap" id="sfCap">先看清回流路径；下一步 AI 将池容压到约一半，占地空间可同步节省近一半。</p>
+        </div>
 
         <div class="reveal">
           <div class="result-card">
@@ -724,14 +896,14 @@
 
         <div class="final-grid">
           <div class="final-card">
-            <div class="n">↓40%</div>
-            <div class="c">池容缩减</div>
-            <div class="d">50,000 → 30,000 m³</div>
+            <div class="n">≈½</div>
+            <div class="c">池容 / 占地</div>
+            <div class="d">50,000 → 约 30,000 m³，空间近一半</div>
           </div>
           <div class="final-card">
-            <div class="n">弹性</div>
-            <div class="c">以工艺弹性替代工程冗余</div>
-            <div class="d">参数重配释放池容，不必堆工程量</div>
+            <div class="n">回流</div>
+            <div class="c">以内外回流换工程冗余</div>
+            <div class="d">强化 r / R，小池也能稳住脱氮除磷</div>
           </div>
           <div class="final-card">
             <div class="n">一级A</div>
@@ -1111,10 +1283,47 @@
       requestAnimationFrame(tick);
     }
 
+    function setSimpleTankLabels(total) {
+      const ana = Math.round(total * 0.08);
+      const anx = Math.round(total * 0.38);
+      const ox = Math.round(total * 0.54);
+      const elAna = document.getElementById("sfAna");
+      const elAnx = document.getElementById("sfAnx");
+      const elOx = document.getElementById("sfOx");
+      if (elAna) elAna.textContent = ana.toLocaleString() + " m³";
+      if (elAnx) elAnx.textContent = anx.toLocaleString() + " m³";
+      if (elOx) elOx.textContent = ox.toLocaleString() + " m³";
+    }
+
+    function playSimpleFlow() {
+      const box = document.getElementById("simpleFlow");
+      const badge = document.getElementById("sfBadge");
+      const space = document.getElementById("sfSpaceLabel");
+      const cap = document.getElementById("sfCap");
+      if (!box) return;
+      box.classList.remove("is-slim");
+      setSimpleTankLabels(TRAD_V);
+      if (badge) badge.textContent = "传统池容";
+      if (space) space.textContent = "占地 100%";
+      if (cap) {
+        cap.innerHTML = "回流路径先亮起：<b>内回流 r</b>（好氧→缺氧）、<b>外回流 R</b>（二沉→厌氧）。";
+      }
+      setTimeout(() => {
+        box.classList.add("is-slim");
+        setSimpleTankLabels(AI_V);
+        if (badge) badge.textContent = "缩减后 · 约一半";
+        if (space) space.textContent = "占地 ≈50%";
+        if (cap) {
+          cap.innerHTML = "强化内外回流后，池容从 <b>50,000</b> 压到约 <b>30,000 m³</b>——池子近一半，占地空间可节省近一半。";
+        }
+      }, 700);
+    }
+
     function playReveal() {
       const el = document.getElementById("needVol");
       const fill = document.getElementById("fillAi");
       fill.style.width = "0%";
+      playSimpleFlow();
       const t0 = performance.now();
       const tick = (t) => {
         const p = Math.min(1, (t - t0) / 1000);
