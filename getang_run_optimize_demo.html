@@ -57,7 +57,7 @@
       -webkit-background-clip: text; background-clip: text; color: transparent;
     }
 
-    .rail { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+    .rail { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
     .rail button {
       appearance: none; border: 1px solid rgba(14,28,36,.1); background: rgba(255,255,255,.58);
       border-radius: 16px; padding: 12px 10px; text-align: left; cursor: pointer;
@@ -222,52 +222,151 @@
       color: var(--muted);
       letter-spacing: .04em;
     }
-    .train-grid {
-      display: grid;
-      grid-template-columns: repeat(9, minmax(0, 1fr));
-      gap: 8px;
-      width: 100%;
-    }
-    .train-item {
-      min-width: 0;
-      border-radius: 12px;
-      border: 1px solid rgba(14,28,36,.1);
-      background: #fff;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 8px 18px rgba(14,28,36,.05);
-      transition: transform .2s ease, box-shadow .2s ease;
-    }
-    .train-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 24px rgba(14,28,36,.1);
-    }
-    .train-item.is-bio {
-      border-color: rgba(13,124,120,.35);
-      box-shadow: 0 8px 18px rgba(13,124,120,.1);
-    }
-    .train-item img {
-      display: block;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-      background: #eef3f6;
-    }
-    .train-item span {
-      display: block;
-      padding: 10px 4px 12px;
-      text-align: center;
-      font-size: clamp(12px, 1.1vw, 14px);
-      font-weight: 600;
-      line-height: 1.35;
-      color: var(--ink);
-    }
     @media (min-width: 1400px) {
-      .train-item img { aspect-ratio: 1 / 0.92; }
       .stage { min-height: 640px; padding: 32px 36px 28px; }
     }
-    .train-item.is-bio span { color: var(--teal-deep); }
+
+    /* 二维工艺拓扑 */
+    .topo-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .topo-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-width: 720px;
+      font-family: var(--sans);
+    }
+    .topo-svg .pipe {
+      fill: none;
+      stroke: #4b6573;
+      stroke-width: 2.8;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+    }
+    .topo-svg .pipe-main {
+      stroke: #0e1c24;
+      stroke-width: 2.4;
+    }
+    .topo-svg .pipe-flow {
+      fill: none;
+      stroke: rgba(31,157,114,.7);
+      stroke-width: 2;
+      stroke-dasharray: 6 8;
+      stroke-linecap: round;
+      animation: dashFlow 1.15s linear infinite;
+      pointer-events: none;
+    }
+    .topo-svg .pipe-r {
+      fill: none;
+      stroke: #0a6b67;
+      stroke-width: 3.4;
+      stroke-dasharray: 10 6;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+      animation: dashFlow 1s linear infinite;
+    }
+    .topo-svg .pipe-R {
+      fill: none;
+      stroke: #9a3412;
+      stroke-width: 3.4;
+      stroke-dasharray: 11 6;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+      animation: dashFlow 1.25s linear infinite;
+    }
+    .topo-svg .pipe-was {
+      fill: none;
+      stroke: #475569;
+      stroke-width: 2.4;
+      stroke-dasharray: 4 4;
+      stroke-linecap: square;
+    }
+    .topo-svg .unit {
+      fill: #fff;
+      stroke: #1f3340;
+      stroke-width: 2;
+    }
+    .topo-svg .unit.bio {
+      fill: #dff3ef;
+      stroke: #0d7c78;
+      stroke-width: 2.2;
+    }
+    .topo-svg .unit.clarify {
+      fill: #f3f7f9;
+      stroke: #1f3340;
+      stroke-width: 2;
+    }
+    .topo-svg .unit-title {
+      fill: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+      text-anchor: middle;
+    }
+    .topo-svg .unit.bio + .unit-title,
+    .topo-svg .bio-title { fill: var(--teal-deep); }
+    .topo-svg .unit-sub {
+      fill: var(--muted);
+      font-size: 10px;
+      font-family: var(--mono);
+      text-anchor: middle;
+    }
+    .topo-svg .io-lab {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-anchor: middle;
+    }
+    .topo-svg .zone {
+      fill: rgba(13,124,120,.08);
+      stroke: rgba(13,124,120,.4);
+      stroke-width: 1.6;
+      stroke-dasharray: 6 4;
+    }
+    .topo-svg .zone-lab {
+      fill: var(--teal-deep);
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--mono);
+      letter-spacing: .06em;
+    }
+    .topo-svg .rec-lab {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: var(--mono);
+    }
+    .topo-svg .grid-bg {
+      fill: #eef4f6;
+      stroke: rgba(14,28,36,.14);
+      stroke-width: 1.4;
+    }
+    .topo-svg .elbow {
+      fill: #0e1c24;
+    }
+    .topo-svg .elbow.rin { fill: #0a6b67; }
+    .topo-svg .elbow.rout { fill: #9a3412; }
+    .topo-legend {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 18px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .topo-legend i {
+      display: inline-block;
+      width: 22px;
+      height: 3px;
+      margin-right: 6px;
+      vertical-align: middle;
+      border-radius: 2px;
+    }
+    .topo-legend .main i { background: #13454a; }
+    .topo-legend .rin i { background: #0d7c78; }
+    .topo-legend .rout i { background: #9a3412; }
+    .topo-legend .was i { background: #64748b; }
 
     .wq-board {
       margin-top: 12px;
@@ -370,6 +469,35 @@
     }
     .seg-note b { color: #9a3412; font-family: var(--mono); }
 
+    .issue-strip {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .issue-card {
+      border-radius: 18px;
+      padding: 16px 18px;
+      border: 1px solid rgba(14,28,36,.1);
+      background: rgba(255,255,255,.88);
+    }
+    .issue-card.is-warn {
+      border-color: rgba(180,83,9,.28);
+      background: linear-gradient(160deg, rgba(255,247,237,.95), rgba(255,255,255,.92));
+    }
+    .issue-card .k {
+      font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--muted);
+    }
+    .issue-card .v {
+      margin-top: 6px; font-family: var(--display); font-size: 28px; font-weight: 900; color: #9a3412;
+    }
+    .issue-card .d {
+      margin-top: 8px; font-size: 13px; color: var(--muted); line-height: 1.55;
+    }
+    @media (max-width: 900px) {
+      .issue-strip { grid-template-columns: 1fr; }
+    }
+
     .assemble {
       margin-top: 20px; min-height: 280px; border-radius: 24px;
       border: 1px solid rgba(13,124,120,.18);
@@ -403,7 +531,11 @@
       background: rgba(14,28,36,.9); color: #b7f0e4; line-height: 1.7;
     }
 
-    /* 简易工艺图：内外回流 + 缩池动画 */
+    @keyframes dashFlow {
+      to { stroke-dashoffset: -22; }
+    }
+
+    /* 第4步：二维拓扑 + 缩池 / 回流强化 */
     .simple-flow {
       margin-top: 18px;
       border-radius: 22px;
@@ -412,7 +544,7 @@
       padding: 16px 18px 14px;
     }
     .sf-head {
-      display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px;
+      display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px;
     }
     .sf-head h3 { margin: 0; font-size: 13px; font-weight: 700; color: var(--teal-deep); }
     .sf-badge {
@@ -424,110 +556,52 @@
     .simple-flow.is-slim .sf-badge {
       background: rgba(31,157,114,.16); color: var(--teal-deep);
     }
-    .sf-board {
-      position: relative;
-      padding: 22px 4px 28px;
-      min-height: 190px;
+    .simple-flow.is-slim .sf-topo .pipe-r {
+      stroke-width: 2.6;
+      animation-duration: .85s;
     }
-    .sf-arrows text { font-weight: 700; }
-    .sf-row {
-      display: grid;
-      grid-template-columns: 48px repeat(4, minmax(0, 1fr)) 48px;
-      gap: 8px;
-      align-items: end;
+    .simple-flow.is-slim .sf-topo .pipe-R {
+      stroke-width: 2.2;
+      animation-duration: 1.1s;
     }
-    .sf-io {
-      text-align: center; font-size: 12px; font-weight: 700; color: var(--muted);
-      padding-bottom: 18px;
+    /* 池体 + 内回流一体：持续变大变小 */
+    .sf-bio-shrink {
+      transform-box: view-box;
+      transform-origin: 360px 130px;
     }
-    .sf-tank {
-      position: relative;
-      border-radius: 14px 14px 10px 10px;
-      border: 1px solid rgba(13,124,120,.28);
-      background: linear-gradient(180deg, #e7f7f4, #fff);
-      height: 118px;
-      display: flex; flex-direction: column; justify-content: flex-end;
-      align-items: center;
-      padding: 8px 4px;
-      transition: height .9s cubic-bezier(.2,.8,.2,1), background .4s ease, border-color .4s ease;
-      box-shadow: 0 10px 22px rgba(14,28,36,.06);
-      overflow: hidden;
+    @keyframes bioPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(0.86); }
     }
-    .sf-tank::before {
-      content: "";
-      position: absolute; left: 0; right: 0; bottom: 0;
-      height: 42%;
-      background: linear-gradient(180deg, rgba(13,124,120,.18), rgba(13,124,120,.34));
-      transition: height .9s cubic-bezier(.2,.8,.2,1);
-    }
-    .sf-tank b {
-      position: relative; z-index: 1;
-      font-size: clamp(12px, 1.2vw, 14px); font-weight: 700; color: var(--ink);
-    }
-    .sf-tank i {
-      position: relative; z-index: 1;
-      margin-top: 4px; font-style: normal; font-family: var(--mono);
-      font-size: 11px; color: var(--teal-deep); font-weight: 700;
-    }
-    .simple-flow.is-slim .sf-tank {
-      height: 58px;
-      border-color: rgba(31,157,114,.4);
-      background: linear-gradient(180deg, #dff7ee, #fff);
-    }
-    .simple-flow.is-slim .sf-tank::before { height: 55%; }
-    .sf-arrows {
-      position: absolute; left: 0; right: 0; top: 0; bottom: 0;
-      width: 100%; height: 100%; pointer-events: none; overflow: visible;
-    }
-    .sf-arrows path {
-      fill: none; stroke-width: 2.2; stroke-linecap: round;
-    }
-    .sf-arrows .r-in {
-      stroke: #0d7c78;
-      stroke-dasharray: 6 5;
-      animation: dashFlow 1.1s linear infinite;
-    }
-    .sf-arrows .r-out {
-      stroke: #9a3412;
-      stroke-dasharray: 7 5;
-      animation: dashFlow 1.4s linear infinite;
-    }
-    .simple-flow.is-slim .sf-arrows .r-in { stroke-width: 3; animation-duration: .75s; }
-    .simple-flow.is-slim .sf-arrows .r-out { stroke-width: 2.6; }
-    @keyframes dashFlow {
-      to { stroke-dashoffset: -22; }
-    }
-    .sf-legend {
-      margin-top: 6px; display: flex; flex-wrap: wrap; gap: 14px;
-      font-size: 12px; color: var(--muted);
-    }
-    .sf-legend span::before {
-      content: ""; display: inline-block; width: 18px; height: 3px;
-      margin-right: 6px; vertical-align: middle; border-radius: 2px;
-    }
-    .sf-legend .in::before { background: #0d7c78; }
-    .sf-legend .out::before { background: #9a3412; }
-    .sf-foot {
-      margin-top: 12px;
-      display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;
-    }
-    .sf-space {
-      height: 16px; border-radius: 999px; background: rgba(14,28,36,.08); overflow: hidden;
-      position: relative;
-    }
-    .sf-space .bar {
-      height: 100%; width: 100%; border-radius: inherit;
-      background: linear-gradient(90deg, #13454a, #0d7c78);
-      transition: width .9s cubic-bezier(.2,.8,.2,1);
-    }
-    .simple-flow.is-slim .sf-space .bar { width: 50%; background: linear-gradient(90deg, #0d7c78, #1f9d72); }
-    .sf-space-label {
-      font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--teal-deep); white-space: nowrap;
+    .simple-flow.is-slim .sf-bio-shrink {
+      animation: bioPulse 2.2s ease-in-out infinite;
     }
     .sf-cap {
       margin: 10px 0 0; font-size: 13px; color: var(--muted); line-height: 1.6;
     }
     .sf-cap b { color: var(--teal-deep); font-family: var(--mono); }
+    .sf-vol-hi, .sf-vol-lo {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: var(--mono);
+      letter-spacing: .02em;
+    }
+    .sf-vol-hi { fill: var(--teal-deep); }
+    .sf-vol-lo { fill: #b42318; opacity: 0; }
+    .simple-flow.is-slim .sf-vol-hi {
+      animation: volHi 2.2s ease-in-out infinite;
+    }
+    .simple-flow.is-slim .sf-vol-lo {
+      animation: volLo 2.2s ease-in-out infinite;
+    }
+    @keyframes volHi {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    @keyframes volLo {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
 
     /* AI 自动给出缩容结果（无滑块） */
     .reveal {
@@ -625,14 +699,7 @@
       .rail { grid-template-columns: 1fr 1fr; }
       .vol-hero, .reveal, .final-grid, .wq-pair { grid-template-columns: 1fr; }
       .top { flex-direction: column; align-items: flex-start; }
-      .train-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .sf-row { grid-template-columns: 36px repeat(4, minmax(0, 1fr)) 36px; gap: 4px; }
-      .sf-tank { height: 96px; }
-      .simple-flow.is-slim .sf-tank { height: 48px; }
-      .sf-io { font-size: 11px; padding-bottom: 12px; }
-    }
-    @media (max-width: 640px) {
-      .train-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .topo-svg { min-width: 780px; }
     }
   </style>
 </head>
@@ -655,8 +722,118 @@
         <h2 class="title">污水处理厂A<em>运行现状</em></h2>
 
         <div class="flow-board">
-          <h3>工艺流程图</h3>
-          <div class="train-grid" id="trainGrid"></div>
+          <h3>工艺流程拓扑</h3>
+          <div class="topo-wrap">
+            <svg class="topo-svg" id="plantTopo" viewBox="0 0 1100 340" role="img" aria-label="污水处理厂二维工艺拓扑图">
+              <defs>
+                <marker id="arrMain" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#0e1c24"/>
+                </marker>
+                <marker id="arrRin" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#0a6b67"/>
+                </marker>
+                <marker id="arrRout" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#9a3412"/>
+                </marker>
+                <marker id="arrWas" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+                  <path d="M0,0 L5,2.5 L0,5 Z" fill="#475569"/>
+                </marker>
+                <pattern id="hatchBio" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                  <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(13,124,120,.22)" stroke-width="2"/>
+                </pattern>
+              </defs>
+
+              <rect class="grid-bg" x="10" y="10" width="1080" height="320" rx="16"/>
+
+              <!-- ===== 上层：预处理 + AAO + 二沉 ===== -->
+              <rect class="zone" x="286" y="86" width="360" height="132" rx="12"/>
+              <text class="zone-lab" x="298" y="108">BIO · AAO</text>
+              <text class="zone-lab" x="520" y="108" text-anchor="end" style="font-size:13px">50,000 m³</text>
+
+              <!-- 主管（箭头缩小） -->
+              <path class="pipe pipe-main" d="M48 160 H88" marker-end="url(#arrMain)"/>
+              <path class="pipe pipe-main" d="M168 160 H198" marker-end="url(#arrMain)"/>
+              <path class="pipe pipe-main" d="M262 160 H286" marker-end="url(#arrMain)"/>
+              <path class="pipe" d="M366 160 H386"/>
+              <path class="pipe" d="M486 160 H506"/>
+              <path class="pipe-flow" d="M48 160 H900"/>
+
+              <!-- 内回流 r：好氧 → 缺氧，标百分比 -->
+              <path class="pipe-r" marker-end="url(#arrRin)" d="M560 128 V52 H436 V128"/>
+              <rect class="elbow rin" x="556" y="124" width="6" height="6"/>
+              <rect class="elbow rin" x="556" y="49" width="6" height="6"/>
+              <rect class="elbow rin" x="433" y="49" width="6" height="6"/>
+              <rect class="elbow rin" x="433" y="124" width="6" height="6"/>
+              <rect x="450" y="28" width="100" height="22" rx="5" fill="#fff" stroke="#0a6b67" stroke-width="1.4"/>
+              <text class="rec-lab" x="500" y="44" text-anchor="middle" fill="#0a6b67">r 内回流 300%</text>
+
+              <!-- 外回流 R：二沉 → 厌氧，标百分比 -->
+              <path class="pipe-R" marker-end="url(#arrRout)" d="M760 204 V268 H318 V204"/>
+              <rect class="elbow rout" x="757" y="201" width="6" height="6"/>
+              <rect class="elbow rout" x="757" y="265" width="6" height="6"/>
+              <rect class="elbow rout" x="315" y="265" width="6" height="6"/>
+              <rect class="elbow rout" x="315" y="201" width="6" height="6"/>
+              <rect x="480" y="278" width="100" height="22" rx="5" fill="#fff" stroke="#9a3412" stroke-width="1.4"/>
+              <text class="rec-lab" x="530" y="294" text-anchor="middle" fill="#9a3412">R 外回流 70%</text>
+
+              <!-- 剩余污泥 -->
+              <path class="pipe-was" marker-end="url(#arrWas)" d="M780 188 V236 H830"/>
+              <text class="unit-sub" x="840" y="240" text-anchor="start">剩余污泥</text>
+
+              <text class="io-lab" x="36" y="156">进水</text>
+              <text class="unit-sub" x="36" y="174">Q</text>
+
+              <!-- 格栅 -->
+              <rect class="unit" x="88" y="130" width="80" height="60" rx="6"/>
+              <rect x="84" y="154" width="6" height="12" fill="#0e1c24"/>
+              <rect x="166" y="154" width="6" height="12" fill="#0e1c24"/>
+              <text class="unit-title" x="128" y="158">格栅</text>
+              <text class="unit-sub" x="128" y="176">预处理</text>
+
+              <!-- 初沉 -->
+              <circle class="unit clarify" cx="230" cy="160" r="32"/>
+              <rect x="196" y="154" width="6" height="12" fill="#0e1c24"/>
+              <rect x="258" y="154" width="6" height="12" fill="#0e1c24"/>
+              <text class="unit-title" x="230" y="156">初沉</text>
+              <text class="unit-sub" x="230" y="174">沉淀</text>
+
+              <!-- AAO 三段：厌氧 / 缺氧 / 好氧 -->
+              <rect class="unit bio" x="286" y="128" width="80" height="64" rx="4"/>
+              <rect x="286" y="160" width="80" height="32" fill="url(#hatchBio)"/>
+              <text class="unit-title bio-title" x="326" y="154">厌氧</text>
+              <text class="unit-sub" x="326" y="176">Ana</text>
+
+              <rect class="unit bio" x="386" y="128" width="100" height="64" rx="4"/>
+              <rect x="386" y="160" width="100" height="32" fill="url(#hatchBio)"/>
+              <text class="unit-title bio-title" x="436" y="154">缺氧</text>
+              <text class="unit-sub" x="436" y="176">Anx</text>
+
+              <rect class="unit bio" x="506" y="128" width="120" height="64" rx="4"/>
+              <rect x="506" y="160" width="120" height="32" fill="url(#hatchBio)"/>
+              <text class="unit-title bio-title" x="566" y="154">好氧</text>
+              <text class="unit-sub" x="566" y="176">Ox</text>
+
+              <path class="pipe pipe-main" d="M626 160 H720" marker-end="url(#arrMain)"/>
+
+              <circle class="unit clarify" cx="760" cy="160" r="40"/>
+              <rect x="718" y="154" width="6" height="12" fill="#0e1c24"/>
+              <rect x="796" y="154" width="6" height="12" fill="#0e1c24"/>
+              <text class="unit-title" x="760" y="156">二沉</text>
+              <text class="unit-sub" x="760" y="174">固液分离</text>
+
+              <!-- 二沉后直接出水 -->
+              <path class="pipe pipe-main" d="M800 160 H900" marker-end="url(#arrMain)"/>
+              <path class="pipe-flow" d="M800 160 H900"/>
+              <text class="io-lab" x="920" y="156">出水</text>
+              <text class="unit-sub" x="920" y="174">一级 A</text>
+            </svg>
+          </div>
+          <div class="topo-legend">
+            <span class="main"><i></i>主流向</span>
+            <span class="rin"><i></i>内回流 r = 300%（好氧→缺氧）</span>
+            <span class="rout"><i></i>外回流 R = 70%（二沉→厌氧）</span>
+            <span class="was"><i></i>剩余污泥</span>
+          </div>
         </div>
 
         <div class="wq-board">
@@ -718,14 +895,15 @@
         </div>
 
         <div class="actions">
-          <button class="btn btn-primary" data-go="1">下一步：模型仿真 →</button>
+          <button class="btn btn-primary" data-go="1">下一步：仿真诊断 →</button>
         </div>
       </section>
 
-      <!-- 2 模型仿真：逐模块加载 + 进水数据 -->
+      <!-- 2 仿真诊断：进水解析 + 发现问题 -->
       <section class="act" data-i="1">
-        <p class="eyebrow">Step 02 · 模型仿真</p>
-        <h2 class="title">模型仿真，解析 <em>进水数据</em></h2>
+        <p class="eyebrow">Step 02 · 仿真诊断</p>
+        <h2 class="title">模型仿真，发现 <em>池容与能耗问题</em></h2>
+        <p class="lead">解析进水波动后，模型给出诊断：生化池容占比偏大，曝气与提升能耗偏高，有效容积利用率不足。</p>
 
         <div class="sim-board">
           <div class="assemble" id="simAssemble">
@@ -752,17 +930,19 @@
           </div>
         </div>
 
-        <div class="actions">
-          <button class="btn" data-go="0">返回现状</button>
-          <button class="btn btn-teal" id="btnToFind" data-go="2" disabled>模型就绪：发现问题 →</button>
+        <div class="issue-strip" id="issueStrip">
+          <div class="issue-card is-warn">
+            <div class="k">池容占比</div>
+            <div class="v">偏大</div>
+            <div class="d">生化总容积 50,000 m³，理论只需约 30,000 m³，冗余约 40%</div>
+          </div>
+          <div class="issue-card is-warn">
+            <div class="k">运行能耗</div>
+            <div class="v">偏高</div>
+            <div class="d">大池好氧曝气与内外回流提升功耗被放大，吨水电耗偏高</div>
+          </div>
         </div>
-      </section>
 
-      <!-- 3 发现问题：容积推导 -->
-      <section class="act" data-i="2">
-        <p class="eyebrow">Step 03 · 发现问题</p>
-        <h2 class="title">模型推导：有效容积利用率 <em>不足</em></h2>
-        <p class="lead">仿真显示有效容积利用率不足。传统设计冗余度过高，需把总池容拆到五段上看冗余落点。</p>
         <div class="vol-hero">
           <div class="mega-wrap">
             <div>
@@ -770,67 +950,126 @@
               <div class="mega-cap">m³ · 现状生化总容积</div>
             </div>
             <div class="derive-box">
-              模型反演：当前进水负荷下，维持一级 A 达标所需理论有效容积仅为 <b>30,000 m³</b>，传统设计冗余度过高。
+              模型反演：维持一级 A 达标的理论有效容积约 <b>30,000 m³</b>；现状池体偏大，直接推高占地与能耗。
             </div>
           </div>
           <div class="seg-panel">
-            <h3>五段池容分解 <span>与左侧结论联动</span></h3>
+            <h3>AAO 池容分解 <span>好氧段占比最大</span></h3>
             <div class="seg-bars" id="segBars"></div>
-            <p class="seg-note" id="segNote">核心冗余集中在好氧段（<b>24,000 m³</b>）。</p>
+            <p class="seg-note" id="segNote">好氧段池容与曝气功耗叠加，是「池大、能耗高」的核心落点。</p>
           </div>
         </div>
+
         <div class="actions">
-          <button class="btn" data-go="1">返回仿真</button>
-          <button class="btn btn-primary" data-go="3">下一步：调试对比 →</button>
+          <button class="btn" data-go="0">返回现状</button>
+          <button class="btn btn-teal" id="btnToFind" data-go="2" disabled>下一步：调试对比 →</button>
         </div>
       </section>
 
-      <!-- 4 调试对比 -->
-      <section class="act" data-i="3">
-        <p class="eyebrow">Step 04 · 调试对比</p>
+      <!-- 3 调试对比 -->
+      <section class="act" data-i="2">
+        <p class="eyebrow">Step 03 · 调试对比</p>
         <h2 class="title">AI 调试对比：池容缩减与 <em>参数重配</em></h2>
-        <p class="lead">保持进水条件与一级 A 达标约束，AI 强化内外回流并重配参数，释放冗余池容。</p>
-
         <div class="simple-flow" id="simpleFlow">
           <div class="sf-head">
-            <h3>简易工艺示意 · 内外回流</h3>
-            <div class="sf-badge" id="sfBadge">传统池容</div>
+            <h3>AAO 工艺示意 · 参数调试</h3>
+            <div class="sf-badge" id="sfBadge">原设定</div>
           </div>
-          <div class="sf-board">
-            <div class="sf-row" id="sfRow">
-              <span class="sf-io">进水</span>
-              <div class="sf-tank" data-tank="ana"><b>厌氧</b><i id="sfAna">—</i></div>
-              <div class="sf-tank" data-tank="anx"><b>缺氧</b><i id="sfAnx">—</i></div>
-              <div class="sf-tank" data-tank="ox"><b>好氧</b><i id="sfOx">—</i></div>
-              <div class="sf-tank" data-tank="sec"><b>二沉</b><i>沉淀</i></div>
-              <span class="sf-io">出水</span>
-            </div>
-            <svg class="sf-arrows" id="sfArrows" viewBox="0 0 1000 190" preserveAspectRatio="none" aria-hidden="true">
-              <!-- 内回流：好氧 → 缺氧（上方） -->
-              <path class="r-in" d="M 585 42 C 560 6, 470 6, 445 48" marker-end="url(#arrIn)" />
-              <text x="505" y="14" text-anchor="middle" fill="#0d7c78" font-size="18" font-family="Menlo,monospace">r 内回流</text>
-              <!-- 外回流：二沉 → 厌氧（下方） -->
-              <path class="r-out" d="M 780 148 C 700 188, 320 188, 250 132" marker-end="url(#arrOut)" />
-              <text x="515" y="182" text-anchor="middle" fill="#9a3412" font-size="18" font-family="Menlo,monospace">R 外回流</text>
+          <div class="topo-wrap">
+            <svg class="topo-svg sf-topo" id="sfTopo" viewBox="0 0 1000 360" role="img" aria-label="AAO工艺示意">
               <defs>
-                <marker id="arrIn" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-                  <path d="M0,0 L6,3 L0,6 Z" fill="#0d7c78" />
+                <marker id="sfArrMain" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#0e1c24"/>
                 </marker>
-                <marker id="arrOut" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-                  <path d="M0,0 L6,3 L0,6 Z" fill="#9a3412" />
+                <marker id="sfArrR" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#0a6b67"/>
                 </marker>
+                <marker id="sfArrRR" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#9a3412"/>
+                </marker>
+                <pattern id="hatchBio2" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                  <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(13,124,120,.22)" stroke-width="2"/>
+                </pattern>
               </defs>
+
+              <rect class="grid-bg" x="10" y="10" width="980" height="340" rx="14"/>
+
+              <!-- AAO 池体 + 内回流一体，优化后持续脉动 -->
+              <g class="sf-bio-shrink" id="sfBioGroup">
+                <rect class="zone" x="180" y="90" width="360" height="132" rx="12"/>
+                <text class="zone-lab" x="192" y="112">BIO · AAO</text>
+                <!-- 池容放在虚线框右侧外，彻底躲开内回流 -->
+                <text class="sf-vol-hi" id="sfVolHi" x="552" y="112" text-anchor="start">50,000 m³</text>
+                <text class="sf-vol-lo" id="sfVolLo" x="552" y="112" text-anchor="start">30,000 m³</text>
+
+                <rect class="unit bio" x="180" y="132" width="80" height="64" rx="4"/>
+                <rect x="180" y="164" width="80" height="32" fill="url(#hatchBio2)"/>
+                <text class="unit-title bio-title" x="220" y="158">厌氧</text>
+                <text class="unit-sub" id="sfAna" x="220" y="180">—</text>
+
+                <rect class="unit bio" x="280" y="132" width="100" height="64" rx="4"/>
+                <rect x="280" y="164" width="100" height="32" fill="url(#hatchBio2)"/>
+                <text class="unit-title bio-title" x="330" y="158">缺氧</text>
+                <text class="unit-sub" id="sfAnx" x="330" y="180">—</text>
+
+                <rect class="unit bio" x="400" y="132" width="120" height="64" rx="4"/>
+                <rect x="400" y="164" width="120" height="32" fill="url(#hatchBio2)"/>
+                <text class="unit-title bio-title" x="460" y="158">好氧</text>
+                <text class="unit-sub" id="sfOx" x="460" y="180">—</text>
+
+                <!-- 内回流：上翻到框外，下落点在缺氧左缘，避开池容字 -->
+                <path class="pipe-r" marker-end="url(#sfArrR)" d="M505 132 V36 H290 V132"/>
+                <rect class="elbow rin" x="502" y="129" width="6" height="6"/>
+                <rect class="elbow rin" x="502" y="33" width="6" height="6"/>
+                <rect class="elbow rin" x="287" y="33" width="6" height="6"/>
+                <rect class="elbow rin" x="287" y="129" width="6" height="6"/>
+                <rect x="350" y="14" width="120" height="22" rx="5" fill="#fff" stroke="#0a6b67" stroke-width="1.4"/>
+                <text class="rec-lab" id="sfLabRin" x="410" y="30" text-anchor="middle" fill="#0a6b67">r 内回流 300%</text>
+              </g>
+
+              <!-- 主流 -->
+              <path class="pipe pipe-main" d="M48 164 H100" marker-end="url(#sfArrMain)"/>
+              <path class="pipe pipe-main" d="M100 164 H180" marker-end="url(#sfArrMain)"/>
+              <path class="pipe pipe-main" d="M260 164 H280"/>
+              <path class="pipe pipe-main" d="M380 164 H400"/>
+              <path class="pipe pipe-main" d="M520 164 H620" marker-end="url(#sfArrMain)"/>
+              <path class="pipe pipe-main" d="M700 164 H780" marker-end="url(#sfArrMain)"/>
+              <path class="pipe-flow" d="M48 164 H780"/>
+
+              <text class="io-lab" x="40" y="150">进水</text>
+              <text class="unit-sub" x="40" y="180">Q</text>
+
+              <rect class="unit" x="100" y="134" width="60" height="60" rx="6"/>
+              <text class="unit-title" x="130" y="162">格栅</text>
+              <text class="unit-sub" x="130" y="178">预处理</text>
+
+              <circle class="unit clarify" cx="660" cy="164" r="40"/>
+              <text class="unit-title" x="660" y="160">二沉</text>
+              <text class="unit-sub" x="660" y="178">固液分离</text>
+
+              <text class="io-lab" x="820" y="160">出水</text>
+              <text class="unit-sub" x="820" y="178">一级A</text>
+
+              <!-- 外回流（二沉侧） -->
+              <path class="pipe-R" marker-end="url(#sfArrRR)" d="M660 204 V280 H220 V196"/>
+              <rect class="elbow rout" x="657" y="201" width="6" height="6"/>
+              <rect class="elbow rout" x="657" y="277" width="6" height="6"/>
+              <rect class="elbow rout" x="217" y="277" width="6" height="6"/>
+              <rect class="elbow rout" x="217" y="193" width="6" height="6"/>
+              <rect x="370" y="292" width="120" height="22" rx="5" fill="#fff" stroke="#9a3412" stroke-width="1.4"/>
+              <text class="rec-lab" id="sfLabRout" x="430" y="308" text-anchor="middle" fill="#9a3412">R 外回流 70%</text>
+
+              <path class="pipe-was" d="M690 190 V240 H760"/>
+              <text class="unit-sub" x="770" y="244" text-anchor="start">剩余污泥</text>
+
+              <text class="unit-sub" id="sfHrtLab" x="180" y="240" text-anchor="start">HRT ≈ 20 h · SRT 14 d</text>
             </svg>
           </div>
-          <div class="sf-legend">
-            <span class="in">内回流 r（好氧 → 缺氧）</span>
-            <span class="out">外回流 R（二沉 → 厌氧）</span>
+          <div class="topo-legend">
+            <span class="rin"><i></i>内回流 r（好氧→缺氧）</span>
+            <span class="rout"><i></i>外回流 R（二沉→厌氧）</span>
+            <span class="was"><i></i>剩余污泥</span>
           </div>
-          <div class="sf-foot">
-            <div class="sf-space"><div class="bar" id="sfSpaceBar"></div></div>
-            <div class="sf-space-label" id="sfSpaceLabel">占地 100%</div>
-          </div>
-          <p class="sf-cap" id="sfCap">先看清回流路径；下一步 AI 将池容压到约一半，占地空间可同步节省近一半。</p>
         </div>
 
         <div class="reveal">
@@ -866,28 +1105,34 @@
               </thead>
               <tbody>
                 <tr>
+                  <td>内回流比 (r)</td>
+                  <td class="mono">300%</td>
+                  <td class="mono">200%</td>
+                  <td>适当降内回流，减回流泵耗</td>
+                </tr>
+                <tr>
+                  <td>外回流比 (R)</td>
+                  <td class="mono">70%</td>
+                  <td class="mono">30%</td>
+                  <td>外回流再降，稳住厌氧除磷</td>
+                </tr>
+                <tr>
+                  <td>水力停留时间 (HRT)</td>
+                  <td class="mono">20 h</td>
+                  <td class="mono">12 h</td>
+                  <td>池容压减后停留时间缩短</td>
+                </tr>
+                <tr>
+                  <td>污泥龄 (SRT)</td>
+                  <td class="mono">14 d</td>
+                  <td class="mono">20 d</td>
+                  <td>延龄强化硝化与系统稳定</td>
+                </tr>
+                <tr>
                   <td>MLSS 污泥浓度</td>
                   <td class="mono">3,200 mg/L</td>
                   <td class="mono">4,200 mg/L</td>
                   <td>提升生物量，补偿容积</td>
-                </tr>
-                <tr>
-                  <td>内回流比 (r)</td>
-                  <td class="mono">100%</td>
-                  <td class="mono">180%</td>
-                  <td>稳定缺氧环境</td>
-                </tr>
-                <tr>
-                  <td>外回流比 (R)</td>
-                  <td class="mono">100%</td>
-                  <td class="mono">70%</td>
-                  <td>稳住厌氧除磷微环境</td>
-                </tr>
-                <tr>
-                  <td>污泥龄 (SRT)</td>
-                  <td class="mono">10 d</td>
-                  <td class="mono">14 d</td>
-                  <td>强化硝化反硝化</td>
                 </tr>
               </tbody>
             </table>
@@ -896,14 +1141,14 @@
 
         <div class="final-grid">
           <div class="final-card">
-            <div class="n">≈½</div>
-            <div class="c">池容 / 占地</div>
-            <div class="d">50,000 → 约 30,000 m³，空间近一半</div>
+            <div class="n">HRT</div>
+            <div class="c">停留时间缩短</div>
+            <div class="d">20 h → 12 h，池容同步压到约 30,000 m³</div>
           </div>
           <div class="final-card">
             <div class="n">回流</div>
-            <div class="c">以内外回流换工程冗余</div>
-            <div class="d">强化 r / R，小池也能稳住脱氮除磷</div>
+            <div class="c">内外回流重配</div>
+            <div class="d">r 300%→200%，R 70%→30%，泵耗下降</div>
           </div>
           <div class="final-card">
             <div class="n">一级A</div>
@@ -913,7 +1158,7 @@
         </div>
 
         <div class="actions">
-          <button class="btn" data-go="2">返回问题</button>
+          <button class="btn" data-go="1">返回诊断</button>
           <button class="btn btn-teal" data-go="0">从头演示</button>
         </div>
       </section>
@@ -928,22 +1173,10 @@
     }
 
     const TRAD_V = 50000, AI_V = 30000;
-    const TRAIN = [
-      { name: "格栅", img: "./img/unit_screen.jpg", bio: false },
-      { name: "初沉", img: "./img/unit_primary.jpg", bio: false },
-      { name: "厌氧", img: "./img/unit_anaerobic.jpg", bio: true },
-      { name: "缺氧", img: "./img/unit_anoxic.jpg", bio: true },
-      { name: "好氧", img: "./img/unit_aerobic.jpg", bio: true },
-      { name: "二沉", img: "./img/unit_secondary.jpg", bio: false },
-      { name: "高效沉淀", img: "./img/unit_hes.jpg", bio: false },
-      { name: "深床滤池", img: "./img/unit_filter.jpg", bio: false },
-      { name: "次钠消毒", img: "./img/unit_disinfect.jpg", bio: false },
-    ];
     const SHARES = [
-      { name: "厌氧", p: 0.08 }, { name: "缺氧1", p: 0.22 }, { name: "好氧", p: 0.48 },
-      { name: "缺氧2", p: 0.16 }, { name: "后好氧", p: 0.06 },
+      { name: "厌氧", p: 0.08 }, { name: "缺氧", p: 0.38 }, { name: "好氧", p: 0.54 },
     ];
-    const labels = ["运行现状", "模型仿真", "发现问题", "调试对比"];
+    const labels = ["运行现状", "仿真诊断", "调试对比"];
 
     function avg(arr) {
       return arr.reduce((a, b) => a + b, 0) / arr.length;
@@ -993,28 +1226,29 @@
       progress.querySelectorAll("[data-jump]").forEach((b) => b.onclick = () => go(+b.dataset.jump));
     }
 
-    function renderTrain() {
-      const box = document.getElementById("trainGrid");
-      if (!box) return;
-      box.innerHTML = TRAIN.map((u) => `
-        <article class="train-item ${u.bio ? "is-bio" : ""}">
-          <img src="${u.img}" alt="${u.name}" />
-          <span>${u.name}</span>
-        </article>
-      `).join("");
-    }
-
     function chartCommon() {
       return {
         responsive: true,
         maintainAspectRatio: false,
         animation: false,
-        parsing: false,
         plugins: {
           legend: { labels: { boxWidth: 10, font: { size: 11 } } },
         },
         scales: {
-          x: { grid: { color: "rgba(19,32,40,0.05)" }, ticks: { font: { size: 10 } } },
+          x: {
+            grid: { color: "rgba(19,32,40,0.05)" },
+            ticks: {
+              font: { size: 11 },
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 7,
+              callback(value) {
+                const i = Number(value);
+                if (!Number.isFinite(i)) return "";
+                return i % 24 === 12 ? AXIS_DATES[Math.floor(i / 24)] : "";
+              },
+            },
+          },
           y: { grid: { color: "rgba(19,32,40,0.06)" }, ticks: { font: { size: 10 } } },
         },
       };
@@ -1025,51 +1259,52 @@
       if (charts.out) { charts.out.destroy(); charts.out = null; }
     }
 
-    function dateTick(value, index) {
-      return index % 24 === 12 ? AXIS_DATES[Math.floor(index / 24)] : "";
-    }
-
-    function initEmptyCharts() {
+    function ensureChartsReady() {
+      const elIn = document.getElementById("chartIn");
+      const elOut = document.getElementById("chartOut");
+      const liveIn = elIn && typeof Chart !== "undefined" ? Chart.getChart(elIn) : null;
+      const liveOut = elOut && typeof Chart !== "undefined" ? Chart.getChart(elOut) : null;
+      if (liveIn && liveOut) {
+        charts.inn = liveIn;
+        charts.out = liveOut;
+        return;
+      }
       destroyCharts();
       const common = chartCommon();
       const n = AXIS_LABELS.length;
-      const empty = () => Array(n).fill(null);
-      charts.inn = new Chart(document.getElementById("chartIn"), {
+      const lim = (v) => Array(n).fill(v);
+      charts.inn = new Chart(elIn, {
         type: "line",
         data: {
           labels: AXIS_LABELS,
           datasets: [
             {
               label: "进水 COD",
-              data: empty(),
+              data: IN_COD.slice(),
               borderColor: "#13454a",
               backgroundColor: "rgba(19,69,74,0.08)",
-              fill: true, tension: 0, pointRadius: 0, borderWidth: 1.4,
-              spanGaps: false,
+              fill: true, tension: 0, pointRadius: 0, borderWidth: 1.3,
             },
             {
               label: "进水 TN",
-              data: empty(),
+              data: IN_TN.slice(),
               borderColor: "#0d7c78",
-              tension: 0, pointRadius: 0, borderWidth: 1.3,
-              yAxisID: "y1", spanGaps: false,
+              tension: 0, pointRadius: 0, borderWidth: 1.2,
+              yAxisID: "y1",
             },
             {
               label: "进水 TP",
-              data: empty(),
+              data: IN_TP.slice(),
               borderColor: "#7c3aed",
-              tension: 0, pointRadius: 0, borderWidth: 1.3,
-              yAxisID: "y2", spanGaps: false,
+              tension: 0, pointRadius: 0, borderWidth: 1.2,
+              yAxisID: "y2",
             },
           ],
         },
         options: {
           ...common,
           scales: {
-            x: {
-              grid: { color: "rgba(19,32,40,0.04)" },
-              ticks: { font: { size: 12 }, maxRotation: 0, autoSkip: false, callback: dateTick, maxTicksLimit: 7 },
-            },
+            ...common.scales,
             y: { ...common.scales.y, suggestedMin: 100, suggestedMax: 520, title: { display: true, text: "COD", font: { size: 10 } } },
             y1: {
               position: "right",
@@ -1089,48 +1324,48 @@
           },
         },
       });
-      charts.out = new Chart(document.getElementById("chartOut"), {
+      charts.out = new Chart(elOut, {
         type: "line",
         data: {
           labels: AXIS_LABELS,
           datasets: [
             {
               label: "出水 COD",
-              data: empty(),
+              data: OUT_COD.slice(),
               borderColor: "#13454a",
               backgroundColor: "rgba(19,69,74,0.08)",
-              fill: true, tension: 0, pointRadius: 0, borderWidth: 1.4, spanGaps: false,
+              fill: true, tension: 0, pointRadius: 0, borderWidth: 1.3,
             },
             {
               label: "出水 TN",
-              data: empty(),
+              data: OUT_TN.slice(),
               borderColor: "#1f9d72",
-              tension: 0, pointRadius: 0, borderWidth: 1.3, spanGaps: false,
+              tension: 0, pointRadius: 0, borderWidth: 1.2,
             },
             {
               label: "出水 TP",
-              data: empty(),
+              data: OUT_TP.slice(),
               borderColor: "#7c3aed",
-              tension: 0, pointRadius: 0, borderWidth: 1.3,
-              yAxisID: "y1", spanGaps: false,
+              tension: 0, pointRadius: 0, borderWidth: 1.2,
+              yAxisID: "y1",
             },
             {
               label: "COD 限值 50",
-              data: Array(n).fill(50),
+              data: lim(50),
               borderColor: "rgba(180,35,24,0.4)",
-              borderDash: [5, 4], pointRadius: 0, borderWidth: 1.1,
+              borderDash: [5, 4], pointRadius: 0, borderWidth: 1,
             },
             {
               label: "TN 限值 15",
-              data: Array(n).fill(15),
+              data: lim(15),
               borderColor: "rgba(31,157,114,0.45)",
-              borderDash: [4, 4], pointRadius: 0, borderWidth: 1.1,
+              borderDash: [4, 4], pointRadius: 0, borderWidth: 1,
             },
             {
               label: "TP 限值 0.5",
-              data: Array(n).fill(0.5),
+              data: lim(0.5),
               borderColor: "rgba(124,58,237,0.45)",
-              borderDash: [5, 4], pointRadius: 0, borderWidth: 1.1,
+              borderDash: [5, 4], pointRadius: 0, borderWidth: 1,
               yAxisID: "y1",
             },
           ],
@@ -1138,10 +1373,7 @@
         options: {
           ...common,
           scales: {
-            x: {
-              grid: { color: "rgba(19,32,40,0.04)" },
-              ticks: { font: { size: 12 }, maxRotation: 0, autoSkip: false, callback: dateTick, maxTicksLimit: 7 },
-            },
+            ...common.scales,
             y: { ...common.scales.y, suggestedMin: 0, suggestedMax: 55, title: { display: true, text: "COD / TN", font: { size: 10 } } },
             y1: {
               position: "right",
@@ -1153,21 +1385,6 @@
           },
         },
       });
-    }
-
-    function revealInSeries(dsIndex, values) {
-      if (!charts.inn) return;
-      charts.inn.data.datasets[dsIndex].data = values.slice();
-      charts.inn.update("none");
-    }
-
-    function revealOutSeries() {
-      if (!charts.out) return;
-      charts.out.data.datasets[0].data = OUT_COD.slice();
-      charts.out.data.datasets[1].data = OUT_TN.slice();
-      charts.out.data.datasets[2].data = OUT_TP.slice();
-      charts.out.update("none");
-      document.getElementById("outChartCard").classList.add("is-ready");
     }
 
     function startAssemble() {
@@ -1189,7 +1406,6 @@
       box.innerHTML = "";
       log.textContent = "› 载入葛塘小时表 2026-07-01~07（7×24h）…";
       status.innerHTML = '<span class="pulse-dot"></span>加载中…';
-      initEmptyCharts();
 
       MODS.forEach((m) => {
         const div = document.createElement("div");
@@ -1206,7 +1422,18 @@
         "› 完成负荷核算 Ns…",
         "› 跑通出水响应：对照一级 A。",
       ];
-      const seriesMap = [IN_COD, IN_TN, IN_TP];
+
+      // 先让模块区上屏，再异步建图，避免主线程卡死导致「第二步打不开」
+      setTimeout(() => {
+        if (gen !== simGen) return;
+        try {
+          ensureChartsReady();
+          inCard.classList.add("is-ready");
+          outCard.classList.add("is-ready");
+        } catch (err) {
+          log.textContent += "\n› 图表加载失败：" + (err && err.message ? err.message : err);
+        }
+      }, 40);
 
       MODS.forEach((m, i) => {
         setTimeout(() => {
@@ -1221,12 +1448,7 @@
           if (m.kpi) {
             const cell = document.querySelector(`#inKpis .cell[data-k="${m.kpi}"]`);
             if (cell) cell.classList.add("is-on");
-            inCard.classList.add("is-ready");
           }
-          if (typeof m.ds === "number") {
-            revealInSeries(m.ds, seriesMap[m.ds]);
-          }
-          if (m.ds === "out") revealOutSeries();
 
           box.querySelectorAll(".mod").forEach((node, j) => {
             if (j !== i) node.classList.remove("is-run");
@@ -1238,7 +1460,7 @@
             next.disabled = false;
             setTimeout(() => { if (gen === simGen) el.classList.remove("is-run"); }, 400);
           }
-        }, 320 + i * 520);
+        }, 180 + i * 280);
       });
     }
 
@@ -1247,18 +1469,19 @@
       unlocked = Math.max(unlocked, i);
       renderProgress();
       document.querySelectorAll(".act").forEach((el) => el.classList.toggle("is-on", +el.dataset.i === i));
-      if (i === 0) renderTrain();
+      window.scrollTo(0, 0);
       if (i === 1) {
-        requestAnimationFrame(() => startAssemble());
+        startAssemble();
+        setTimeout(() => animateVolume(), 200);
       }
-      if (i === 2) animateVolume();
-      if (i === 3) playReveal();
+      if (i === 2) playReveal();
     }
 
     function animateVolume() {
       const mega = document.getElementById("volMega");
       const bars = document.getElementById("segBars");
       const note = document.getElementById("segNote");
+      if (!mega || !bars) return;
       const ox = SHARES.find((s) => s.name === "好氧");
       const oxVol = Math.round(TRAD_V * ox.p);
       bars.innerHTML = SHARES.map((s) => {
@@ -1270,7 +1493,7 @@
         </div>`;
       }).join("");
       if (note) {
-        note.innerHTML = `核心冗余集中在好氧段（<b>${oxVol.toLocaleString()} m³</b>），与左侧理论有效容积 <b>${AI_V.toLocaleString()} m³</b> 对照。`;
+        note.innerHTML = `好氧段 <b>${oxVol.toLocaleString()} m³</b>（占比 54%），池容大 → 曝气能耗高；理论有效容积仅 <b>${AI_V.toLocaleString()} m³</b>。`;
       }
       const t0 = performance.now();
       const tick = (t) => {
@@ -1298,24 +1521,23 @@
     function playSimpleFlow() {
       const box = document.getElementById("simpleFlow");
       const badge = document.getElementById("sfBadge");
-      const space = document.getElementById("sfSpaceLabel");
-      const cap = document.getElementById("sfCap");
+      const labRin = document.getElementById("sfLabRin");
+      const labRout = document.getElementById("sfLabRout");
+      const hrtLab = document.getElementById("sfHrtLab");
       if (!box) return;
       box.classList.remove("is-slim");
       setSimpleTankLabels(TRAD_V);
-      if (badge) badge.textContent = "传统池容";
-      if (space) space.textContent = "占地 100%";
-      if (cap) {
-        cap.innerHTML = "回流路径先亮起：<b>内回流 r</b>（好氧→缺氧）、<b>外回流 R</b>（二沉→厌氧）。";
-      }
+      if (badge) badge.textContent = "原设定";
+      if (labRin) labRin.textContent = "r 内回流 300%";
+      if (labRout) labRout.textContent = "R 外回流 70%";
+      if (hrtLab) hrtLab.textContent = "HRT ≈ 20 h · SRT 14 d";
       setTimeout(() => {
         box.classList.add("is-slim");
         setSimpleTankLabels(AI_V);
-        if (badge) badge.textContent = "缩减后 · 约一半";
-        if (space) space.textContent = "占地 ≈50%";
-        if (cap) {
-          cap.innerHTML = "强化内外回流后，池容从 <b>50,000</b> 压到约 <b>30,000 m³</b>——池子近一半，占地空间可节省近一半。";
-        }
+        if (badge) badge.textContent = "AI 优化后";
+        if (labRin) labRin.textContent = "r 内回流 200%";
+        if (labRout) labRout.textContent = "R 外回流 30%";
+        if (hrtLab) hrtLab.textContent = "HRT ≈ 12 h · SRT 20 d";
       }, 700);
     }
 
@@ -1341,7 +1563,6 @@
     });
 
     renderProgress();
-    renderTrain();
     go(0);
   </script>
 </body>
